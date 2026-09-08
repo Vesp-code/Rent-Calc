@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Rentabilidad Avanzada</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .panel { background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .titulo-panel { margin-top: 0; font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+        label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.9em; color: #475569; position: relative; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 1em; }
+        input[type="range"] { padding: 0; cursor: pointer; }
+        input:focus, select:focus { outline: none; border-color: #3498db; }
+
+        .flex-row { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+        .btn-perfil { padding: 12px; flex: 1; border: none; border-radius: 6px; font-weight: bold; font-size: 1.05em; cursor: pointer; transition: 0.3s; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-perfil:hover { filter: brightness(1.1); }
+
+        .cal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; padding: 15px; border-radius: 5px; border: 1px dashed #cbd5e1; margin-top: 5px; }
+        .cal-grid label { margin-top: 0; font-size: 0.85em; }
+
+        details { margin-top: 15px; padding: 15px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+        summary { font-weight: bold; cursor: pointer; color: #3498db; font-size: 1em; margin-bottom: 10px; }
+        .neto-box { margin-top: 15px; padding: 10px; background: #ecfdf5; border-left: 4px solid #10b981; font-weight: bold; color: #065f46; font-size: 1.1em;}
+
+        .result-row { display: flex; justify-content: space-between; margin-top: 15px; font-size: 1.05em; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px; }
+        .result-value { font-weight: bold; color: #1e293b; text-align: right;}
+
+        .highlight-box { margin-top: 25px; background: #ebf5ff; border-left: 5px solid #3498db; padding: 15px; border-radius: 0 5px 5px 0; }
+        .highlight-title { font-size: 0.9em; color: #475569; text-transform: uppercase; font-weight: bold; }
+        .canvas-container { height: 300px; width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 style="text-align: center; color: #1e293b; margin-bottom: 20px;">Simulador de Rentabilidad y Nóminas</h2>
+
+        <!-- Botones Maestros de Perfil -->
+        <div class="flex-row" style="margin-bottom: 30px; gap: 20px;">
+            <button id="btnNormal" class="btn-perfil" onclick="setPerfil('normal')">🏢 Perfil: Empresa Estándar</button>
+            <button id="btnCEE" class="btn-perfil" onclick="setPerfil('cee')">♿ Perfil: Centro Especial Empleo</button>
+        </div>
+
+        <div class="grid">
+            <!-- Panel 1: Entrada de Datos -->
+            <div class="panel">
+                <div class="titulo-panel">1. Estructura de Costes (Empresa)</div>
+
+                <label>Formato y Salario Monetario Bruto</label>
+                <div class="flex-row">
+                    <select id="tipoSalario" onchange="calcular('base')" style="width: 40%; margin-top: 0;">
+                        <option value="anual">Anual</option>
+                        <option value="mensual" selected>Mensual</option>
+                        <option value="hora">Precio/Hora</option>
+                    </select>
+                    <input type="number" id="valorSalario" value="1500" oninput="calcular('base')" style="width: 60%; margin-top: 0;">
+                </div>
+
+                <label>Retribución en Especie Anual (€)</label>
+                <input type="number" id="especie" value="0" oninput="calcular('base')">
+
+                <label>Jornada de Trabajo (Horas)</label>
+                <div class="flex-row">
+                    <select id="tipoJornada" onchange="cambiarJornada()" style="width: 45%; margin-top: 0; border-color: #3b82f6;">
+                        <option value="diaria" selected>Diaria</option>
+                        <option value="semanal">Semanal</option>
+                        <option value="mensual">Mensual</option>
+                    </select>
+                    <input type="number" id="horasJornada" value="8" step="0.5" oninput="calcular('base')" style="width: 55%; margin-top: 0; border-color: #3b82f6;">
+                </div>
+
+                <details>
+                    <summary>Ver desglose Cotización Empresa: <span id="resTotalSSEmpresa">0.00</span>%</summary>
+                    <div class="cal-grid">
+                        <div><label>Cont. Comunes (%)</label><input type="number" id="empCC" step="0.01" oninput="calcular('base')"></div>
+                        <div><label>AT y EP (%)</label><input type="number" id="empAT" step="0.01" oninput="calcular('base')"></div>
+                        <div><label>Desempleo (%)</label><input type="number" id="empDes" step="0.01" oninput="calcular('base')"></div>
+                        <div><label>Formación (%)</label><input type="number" id="empForm" step="0.01" oninput="calcular('base')"></div>
+                        <div><label>FOGASA (%)</label><input type="number" id="empFog" step="0.01" oninput="calcular('base')"></div>
+                        <div><label>MEI (%)</label><input type="number" id="empMEI" step="0.01" oninput="calcular('base')"></div>
+                    </div>
+                </details>
+
+                <label>Calendario Anual (365 días)</label>
+                <div class="cal-grid">
+                    <div><label>Fines de semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
+                    <div><label>Festivos</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
+                    <div><label>Vacaciones (hábiles)</label><input type="number" id="vacaciones" value="30" oninput="calcular('base')"></div>
+                    <div><label>Previsión Bajas</label><input type="number" id="bajas" value="0" oninput="calcular('base')" style="border-color: #f87171;"></div>
+                </div>
+
+                <label>Margen de Beneficio Objetivo (%)</label>
+                <input type="number" id="margen" value="20" step="0.1" oninput="calcular('margen')">
+            </div>
+
+            <!-- Panel 2: Análisis Financiero -->
+            <div class="panel">
+                <div class="titulo-panel">2. Análisis Financiero y Nómina</div>
+
+                <div class="result-row"><span>Base Cotización Anual:</span><span class="result-value" id="resBaseCotizacion">0,00 €</span></div>
+                <div class="result-row"><span>Coste Seguridad Social Empresa:</span><span class="result-value" id="resCosteSS">0,00 €</span></div>
+                <div class="result-row" style="background: #f1f5f9; padding: 10px; margin: 15px -10px 0 -10px; border-radius: 5px;">
+                    <span>Coste Total Empresa:</span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
+                </div>
+
+                <div class="result-row"><span id="labelHorasRes">Horas Facturables (8h/día):</span><span class="result-value" id="resHoras">0 h</span></div>
+                <div class="result-row" style="color: #e74c3c;"><span>Punto Muerto (Coste Real/h):</span><span class="result-value" id="resBreakeven">0,00 €/h</span></div>
+
+                <div class="highlight-box">
+                    <div class="highlight-title">Tarifa Comercial Sugerida (€/h)</div>
+                    <div style="display: flex; gap: 15px; margin-top: 10px; align-items: center;">
+                        <input type="range" id="tarifaSlider" min="5" max="60" step="0.1" style="flex-grow: 1;" oninput="syncTarifa('slider')">
+                        <input type="number" id="tarifaInput" value="0.00" step="0.5" style="width: 90px; font-size: 1.2em; font-weight: bold; color: #2563eb; background: transparent; border: 1px solid #93c5fd;" oninput="syncTarifa('input')">
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.95em; color: #059669; font-weight: bold;">
+                        Beneficio Neto Anual: <span id="resBeneficio">0,00 €</span>
+                    </div>
+                </div>
+
+                <details style="border-color: #10b981;">
+                    <summary style="color: #10b981;">Liquidez del Trabajador (Nómina)</summary>
+                    <div class="cal-grid" style="border:none; padding:0;">
+                        <div>
+                            <label>Retención IRPF (%)</label>
+                            <input type="number" id="irpf" step="0.1" oninput="calcular('base')">
+                        </div>
+                        <div>
+                            <label>Número de pagas</label>
+                            <select id="pagas" onchange="calcular('base')"><option value="12">12 pagas</option><option value="14">14 pagas</option></select>
+                        </div>
+                    </div>
+                    <div class="neto-box">Neto a percibir (Mensual): <span id="resNeto" style="float:right;">0,00 €</span></div>
+                </details>
+            </div>
+        </div>
+
+        <div class="titulo-panel">3. Flujo de Caja Mensual Estimado</div>
+        <div class="canvas-container"><canvas id="graficoFlujo"></canvas></div>
+    </div>
+
+    <script>
+        let chartFlujo = null;
+
+        // Ayudante: si cambia el tipo de jornada, pone un valor estándar por defecto (pero el usuario puede editarlo luego)
+        function cambiarJornada() {
+            const tipo = document.getElementById('tipoJornada').value;
+            const input = document.getElementById('horasJornada');
+            if (tipo === 'diaria') input.value = 8;
+            else if (tipo === 'semanal') input.value = 40;
+            else if (tipo === 'mensual') input.value = 160;
+            calcular('base');
+        }
+
+        // Cambia el color de los botones al hacer clic y ajusta impuestos
+        function setPerfil(tipo) {
+            const isCEE = (tipo === 'cee');
+
+            document.getElementById('empCC').value = isCEE ? 0 : 23.60;
+            document.getElementById('empAT').value = isCEE ? 0 : 3.60;
+            document.getElementById('empDes').value = isCEE ? 0 : 5.50;
+            document.getElementById('empForm').value = isCEE ? 0 : 0.60;
+            document.getElementById('empFog').value = isCEE ? 0 : 0.20;
+            document.getElementById('empMEI').value = isCEE ? 0 : 0.75;
+
+            document.getElementById('irpf').value = isCEE ? 2.0 : 10.0;
+
+            const btnNormal = document.getElementById('btnNormal');
+            const btnCEE = document.getElementById('btnCEE');
+
+            if(isCEE) {
+                btnCEE.style.background = '#10b981'; // Verde
+                btnNormal.style.background = '#ef4444'; // Rojo
+            } else {
+                btnNormal.style.background = '#10b981'; // Verde
+                btnCEE.style.background = '#ef4444'; // Rojo
+            }
+
+            calcular('base');
+        }
+
+        function syncTarifa(origen) {
+            const slider = document.getElementById('tarifaSlider');
+            const input = document.getElementById('tarifaInput');
+            if(origen === 'slider') input.value = slider.value;
+            else if (origen === 'input') slider.value = input.value;
+            calcular('tarifa');
+        }
+
+        function calcular(origen) {
+            const tipoSalario = document.getElementById('tipoSalario').value;
+            const valorSalario = parseFloat(document.getElementById('valorSalario').value) || 0;
+            const especieAnual = parseFloat(document.getElementById('especie').value) || 0;
+            const pagas = parseInt(document.getElementById('pagas').value) || 12;
+            let margen = parseFloat(document.getElementById('margen').value) || 0;
+
+            // Lógica de Jornada (Convierte cualquier valor a un equivalente diario para poder operar)
+            const tipoJornada = document.getElementById('tipoJornada').value;
+            const horasJornada = parseFloat(document.getElementById('horasJornada').value) || 0;
+            const diasTeoricos = Math.max(0, 365 - (parseFloat(document.getElementById('finesSemana').value) || 0) - (parseFloat(document.getElementById('festivos').value) || 0));
+
+            let horasDiariasEquivalentes = 0;
+            if (tipoJornada === 'diaria') {
+                horasDiariasEquivalentes = horasJornada;
+            } else if (tipoJornada === 'semanal') {
+                horasDiariasEquivalentes = horasJornada / 5; // Asume 5 días laborables por semana
+            } else if (tipoJornada === 'mensual') {
+                horasDiariasEquivalentes = (horasJornada * 12) / (diasTeoricos || 1);
+            }
+
+            const totalSSEmpresaPorcentaje = (parseFloat(document.getElementById('empCC').value) || 0) +
+                                             (parseFloat(document.getElementById('empAT').value) || 0) +
+                                             (parseFloat(document.getElementById('empDes').value) || 0) +
+                                             (parseFloat(document.getElementById('empForm').value) || 0) +
+                                             (parseFloat(document.getElementById('empFog').value) || 0) +
+                                             (parseFloat(document.getElementById('empMEI').value) || 0);
+
+            document.getElementById('resTotalSSEmpresa').innerText = totalSSEmpresaPorcentaje.toFixed(2);
+            document.getElementById('labelHorasRes').innerText = `Horas Facturables (~${horasDiariasEquivalentes.toFixed(1)}h/día):`;
+
+            const bajas = parseFloat(document.getElementById('bajas').value) || 0;
+            const diasFacturables = Math.max(0, diasTeoricos - (parseFloat(document.getElementById('vacaciones').value) || 0) - bajas);
+
+            // Calculo de horas totales a facturar usando la media diaria
+            const horasFacturables = diasFacturables * horasDiariasEquivalentes;
+
+            let monetarioAnual = 0;
+            if (tipoSalario === 'anual') { monetarioAnual = valorSalario; }
+            else if (tipoSalario === 'mensual') { monetarioAnual = valorSalario * pagas; }
+            // Si cobra por horas, se multiplica la tarifa x horas diarias x dias totales de contrato
+            else if (tipoSalario === 'hora') { monetarioAnual = valorSalario * horasDiariasEquivalentes * diasTeoricos; }
+
+            const baseCotizacionAnual = monetarioAnual + especieAnual;
+            const costeMonetarioEmpresa = Math.max(0, monetarioAnual - (bajas * (monetarioAnual / 365)));
+            const costeSSEmpresa = baseCotizacionAnual * (totalSSEmpresaPorcentaje / 100);
+            const costeAnualTotal = costeMonetarioEmpresa + especieAnual + costeSSEmpresa;
+
+            const breakeven = horasFacturables > 0 ? costeAnualTotal / horasFacturables : 0;
+            let tarifaFinal = 0;
+
+            if (origen === 'tarifa') {
+                tarifaFinal = parseFloat(document.getElementById('tarifaInput').value) || 0;
+                if (breakeven > 0) {
+                    margen = ((tarifaFinal / breakeven) - 1) * 100;
+                    document.getElementById('margen').value = margen.toFixed(1);
+                }
+            } else {
+                tarifaFinal = breakeven * (1 + (margen / 100));
+                document.getElementById('tarifaInput').value = tarifaFinal.toFixed(2);
+                document.getElementById('tarifaSlider').value = tarifaFinal.toFixed(2);
+            }
+
+            const beneficioAnual = (tarifaFinal * horasFacturables) - costeAnualTotal;
+
+            const deduccionesObrera = baseCotizacionAnual * (6.50 / 100);
+            const deduccionesIRPF = baseCotizacionAnual * ((parseFloat(document.getElementById('irpf').value) || 0) / 100);
+            const liquidoMensual = (baseCotizacionAnual - deduccionesObrera - deduccionesIRPF - especieAnual) / pagas;
+
+            document.getElementById('resBaseCotizacion').innerText = baseCotizacionAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resCosteSS').innerText = costeSSEmpresa.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resCosteTotal').innerText = costeAnualTotal.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resHoras').innerText = horasFacturables.toFixed(0) + " h";
+            document.getElementById('resBreakeven').innerText = breakeven.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/h";
+            document.getElementById('resBeneficio').innerText = beneficioAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resNeto').innerText = liquidoMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+
+            const gastoMensual = costeAnualTotal / 12;
+            const ingresosMesProductivo = horasFacturables > 0 ? (tarifaFinal * horasFacturables) / 11 : 0;
+            const flujoProductivo = ingresosMesProductivo - gastoMensual;
+            const flujoVacaciones = -gastoMensual;
+
+            if (chartFlujo) chartFlujo.destroy();
+            chartFlujo = new Chart(document.getElementById('graficoFlujo').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago (Vac)', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Balance Neto Mensual (€)',
+                        data: [...Array(7).fill(flujoProductivo), flujoVacaciones, ...Array(4).fill(flujoProductivo)],
+                        backgroundColor: (c) => c.raw >= 0 ? '#34d399' : '#f87171',
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // Se activa el perfil Empresa Estándar al cargar la página
+        window.onload = () => setPerfil('normal');
+    </script>
+</body>
+</html>
