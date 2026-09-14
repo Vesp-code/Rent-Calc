@@ -6,6 +6,7 @@
     <title>Calculadora de Rentabilidad Avanzada</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* --- ESTILOS PRINCIPALES (Calculadora) --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; margin-bottom: 100px; }
         .container { max-width: 1050px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
@@ -38,13 +39,11 @@
         .toggle-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95em; color: #1e3a8a; margin: 0; }
         .toggle-label input { width: auto; margin: 0; }
 
-        /* Tooltips CSS */
         .info-icon { display: inline-flex; justify-content: center; align-items: center; width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; color: white; font-size: 11px; font-weight: bold; font-family: monospace; margin-left: 5px; cursor: help; position: relative; }
         .info-icon .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #fff; text-align: left; border-radius: 6px; padding: 10px; position: absolute; z-index: 100; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: normal; line-height: 1.4; box-shadow: 0 4px 6px rgba(0,0,0,0.1); pointer-events: none;}
         .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
         .info-icon .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent; }
 
-        /* Widget Comparador Flotante */
         #widgetComparador { position: fixed; bottom: 20px; right: 20px; width: 340px; background: white; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden; border: 1px solid #cbd5e1; }
         #widgetHeader { background: #1e293b; color: white; padding: 12px 15px; font-weight: bold; cursor: grab; display: flex; justify-content: space-between; align-items: center; user-select: none; }
         #widgetHeader:active { cursor: grabbing; }
@@ -55,189 +54,383 @@
         .comp-table th, .comp-table td { padding: 8px 5px; border-bottom: 1px solid #e2e8f0; text-align: right; }
         .comp-table th:first-child, .comp-table td:first-child { text-align: left; font-weight: bold; color: #475569;}
         .comp-diff { font-weight: bold; padding: 10px; margin-top: 15px; border-radius: 5px; text-align: center; font-size: 0.95em; }
+
+        /* --- ESTILOS DEL MODAL PREVIEW (Vista Previa Presupuesto) --- */
+        .modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.85); z-index: 2000; overflow-y: auto; padding: 40px 0; 
+        }
+        .modal-content { 
+            background: white; max-width: 850px; margin: 0 auto; padding: 50px; 
+            border-radius: 4px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+        
+        /* Estilos para textos editables */
+        .editable { border-bottom: 1px dashed #94a3b8; transition: 0.2s; min-width: 50px; display: inline-block; }
+        .editable:hover, .editable:focus { background-color: #f1f5f9; outline: none; border-bottom: 1px solid #3498db; }
+        [contenteditable="true"]:empty:before { content: attr(placeholder); color: #94a3b8; font-style: italic; }
+
+        /* Diseño del Presupuesto */
+        .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+        .pdf-title { margin: 0; font-size: 28px; color: #1e293b; text-transform: uppercase; letter-spacing: 1px;}
+        .pdf-section { margin-bottom: 30px; }
+        .pdf-section h3 { color: #3498db; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px; }
+        
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .pdf-table th, .pdf-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .pdf-table th { background-color: #f8fafc; color: #475569; font-weight: 600; }
+        .pdf-table td { color: #1e293b; }
+        .pdf-table td.monto { text-align: right; font-weight: bold; }
+        
+        .pdf-total-box { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .pdf-total-content { background: #f1f5f9; padding: 20px; border-radius: 8px; border: 1px solid #cbd5e1; width: 350px; }
+        .pdf-total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
+        .pdf-total-final { display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: #0f172a; margin-top: 15px; padding-top: 15px; border-top: 2px solid #cbd5e1; }
+        
+        .pdf-footer { margin-top: 60px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+
+        /* --- REGLAS DE IMPRESIÓN (PDF) --- */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            /* Ocultar la calculadora y otros elementos interactivos */
+            .interfaz-calculadora, #widgetComparador, .modal-actions { display: none !important; }
+            
+            /* El modal pasa a ser la página completa */
+            .modal-overlay { 
+                display: block !important; position: static; background: white; 
+                padding: 0; overflow: visible; height: auto;
+            }
+            .modal-content { box-shadow: none; max-width: 100%; padding: 0; margin: 0; border: none; }
+            
+            /* Quitar el borde de puntos a los textos editables para que parezcan texto normal en el PDF */
+            .editable { border: none !important; background: transparent !important; }
+            
+            /* Forzar colores */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2 style="text-align: center; color: #1e293b; margin-bottom: 20px;">Simulador de Rentabilidad y Nóminas</h2>
+    <!-- A. INTERFAZ DE LA CALCULADORA -->
+    <div class="interfaz-calculadora">
+        <div class="container">
+            <h2 style="text-align: center; color: #1e293b; margin-bottom: 20px;">Simulador de Rentabilidad y Nóminas</h2>
 
-        <div class="flex-row" style="margin-bottom: 30px; gap: 20px;">
-            <button id="btnNormal" class="btn-perfil" onclick="setPerfil('normal')">🏢 Titular: Empresa Estándar</button>
-            <button id="btnCEE" class="btn-perfil" onclick="setPerfil('cee')">♿ Titular: Centro Especial Empleo</button>
-        </div>
-
-        <div class="grid">
-            <!-- Panel 1: Entrada de Datos -->
-            <div class="panel">
-                <div class="titulo-panel">1. Estructura de Costes (Empresa)</div>
-
-                <label>Formato y Salario Monetario Bruto <span class="info-icon">i<span class="tooltip-text">Salario bruto antes de impuestos que cobrará el trabajador.</span></span></label>
-                <div class="flex-row">
-                    <select id="tipoSalario" onchange="calcular('base')" style="width: 40%; margin-top: 0;">
-                        <option value="anual">Anual</option>
-                        <option value="mensual">Mensual</option>
-                        <option value="hora" selected>Precio/Hora</option>
-                    </select>
-                    <input type="number" id="valorSalario" value="10" oninput="calcular('base')" style="width: 60%; margin-top: 0;">
-                </div>
-
-                <label>Costes Indirectos Fijos (€/mes) <span class="info-icon">i<span class="tooltip-text">Gastos de estructura asociados al puesto: Gestoría, EPIs, licencias de software, renting, etc. Se suma al coste operativo.</span></span></label>
-                <input type="number" id="costeIndirecto" value="0" oninput="calcular('base')">
-
-                <label>Jornada de Trabajo (Horas)</label>
-                <div class="flex-row">
-                    <select id="tipoJornada" onchange="cambiarJornada()" style="width: 45%; margin-top: 0; border-color: #3b82f6;">
-                        <option value="diaria">Diaria</option>
-                        <option value="semanal" selected>Semanal</option>
-                        <option value="mensual">Mensual</option>
-                    </select>
-                    <input type="number" id="horasJornada" value="40" step="0.5" oninput="calcular('base')" style="width: 55%; margin-top: 0; border-color: #3b82f6;">
-                </div>
-
-                <details>
-                    <summary>Cotización Titular SS: <span id="resTotalSSEmpresa">0.00</span>%</summary>
-                    <div class="cal-grid">
-                        <div><label>Cont. Comunes (%)</label><input type="number" id="empCC" step="0.01" oninput="calcular('base')"></div>
-                        <div><label>AT y EP (%)</label><input type="number" id="empAT" step="0.01" oninput="calcular('base')"></div>
-                        <div><label>Desempleo (%)</label><input type="number" id="empDes" step="0.01" oninput="calcular('base')"></div>
-                        <div><label>Formación (%)</label><input type="number" id="empForm" step="0.01" oninput="calcular('base')"></div>
-                        <div><label>FOGASA (%)</label><input type="number" id="empFog" step="0.01" oninput="calcular('base')"></div>
-                        <div><label>MEI (%)</label><input type="number" id="empMEI" step="0.01" oninput="calcular('base')"></div>
-                    </div>
-                </details>
-
-                <label>Calendario Anual (365 días) <span class="info-icon">i<span class="tooltip-text">Días teóricos que el empleado NO trabaja. Ayuda a calcular los días reales facturables.</span></span></label>
-                <div class="cal-grid">
-                    <div><label>Fines de semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
-                    <div><label>Festivos</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
-                    <div><label>Vacaciones (hábiles)</label><input type="number" id="vacaciones" value="30" oninput="calcular('base')"></div>
-                    <div><label>Previsión Bajas (días)</label><input type="number" id="bajas" value="0" oninput="calcular('base')" style="border-color: #f87171;"></div>
-                </div>
-
-                <div class="box-sustitucion">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="activarSustitucion" onchange="toggleSustitucion()" checked>
-                        <strong>Sustituir Vacaciones <span class="info-icon" style="background:#1e3a8a;">i<span class="tooltip-text">Calcula el impacto de contratar un sustituto durante el mes de vacaciones (asumido en Agosto). Recuperas la facturación pero pagas dos sueldos.</span></span></strong>
-                    </label>
-                    <div id="opcionesSustitucion" style="display: block; margin-top: 10px;">
-                        <label style="margin-top: 0; font-size: 0.85em;">Perfil del Sustituto:</label>
-                        <select id="perfilSustituto" onchange="calcular('base')">
-                            <option value="cee">♿ Sustituto CEE (0% Seguridad Social)</option>
-                            <option value="normal" selected>🏢 Sustituto Estándar (SS Ordinaria)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <label>Margen de Beneficio Objetivo (%) <span class="info-icon">i<span class="tooltip-text">Porcentaje de beneficio neto que quieres obtener por encima del coste real del trabajador.</span></span></label>
-                <input type="number" id="margen" value="20" step="0.1" oninput="calcular('margen')">
+            <!-- Botones Maestros -->
+            <div class="flex-row" style="margin-bottom: 30px; gap: 15px;">
+                <button id="btnNormal" class="btn-perfil" onclick="setPerfil('normal')">🏢 Titular: Empresa Estándar</button>
+                <button id="btnCEE" class="btn-perfil" onclick="setPerfil('cee')">♿ Titular: Centro Especial Empleo</button>
+                <button class="btn-perfil" style="background: #475569; max-width: 250px;" onclick="abrirVistaPreviaPDF()">👁️ Generar Presupuesto</button>
             </div>
 
-            <!-- Panel 2: Análisis Financiero -->
-            <div class="panel">
-                <div class="titulo-panel">2. Análisis Financiero y Nómina</div>
+            <div class="grid">
+                <!-- Panel 1: Entrada de Datos -->
+                <div class="panel">
+                    <div class="titulo-panel">1. Estructura de Costes (Empresa)</div>
 
-                <div class="result-row"><span>Base Cotización Anual (Titular):</span><span class="result-value" id="resBaseCotizacion">0,00 €</span></div>
-                <div class="result-row"><span>Coste SS Titular:</span><span class="result-value" id="resCosteSS">0,00 €</span></div>
-                
-                <div id="rowCosteSustitucion" class="result-row" style="display: flex; color: #2563eb;">
-                    <span>Coste Sustitución (1 Mes):</span>
-                    <span class="result-value" id="resCosteSustitucion">0,00 €</span>
+                    <label>Formato y Salario Monetario Bruto <span class="info-icon">i<span class="tooltip-text">Salario bruto antes de impuestos que cobrará el trabajador.</span></span></label>
+                    <div class="flex-row">
+                        <select id="tipoSalario" onchange="calcular('base')" style="width: 40%; margin-top: 0;">
+                            <option value="anual">Anual</option>
+                            <option value="mensual">Mensual</option>
+                            <option value="hora" selected>Precio/Hora</option>
+                        </select>
+                        <input type="number" id="valorSalario" value="10" oninput="calcular('base')" style="width: 60%; margin-top: 0;">
+                    </div>
+
+                    <label>Costes Indirectos Fijos (€/mes) <span class="info-icon">i<span class="tooltip-text">Gastos de estructura asociados al puesto: Gestoría, EPIs, licencias de software, renting, etc. Se suma al coste operativo.</span></span></label>
+                    <input type="number" id="costeIndirecto" value="0" oninput="calcular('base')">
+
+                    <label>Jornada de Trabajo (Horas)</label>
+                    <div class="flex-row">
+                        <select id="tipoJornada" onchange="cambiarJornada()" style="width: 45%; margin-top: 0; border-color: #3b82f6;">
+                            <option value="diaria">Diaria</option>
+                            <option value="semanal" selected>Semanal</option>
+                            <option value="mensual">Mensual</option>
+                        </select>
+                        <input type="number" id="horasJornada" value="40" step="0.5" oninput="calcular('base')" style="width: 55%; margin-top: 0; border-color: #3b82f6;">
+                    </div>
+
+                    <details>
+                        <summary>Cotización Titular SS: <span id="resTotalSSEmpresa">0.00</span>%</summary>
+                        <div class="cal-grid">
+                            <div><label>Cont. Comunes (%)</label><input type="number" id="empCC" step="0.01" oninput="calcular('base')"></div>
+                            <div><label>AT y EP (%)</label><input type="number" id="empAT" step="0.01" oninput="calcular('base')"></div>
+                            <div><label>Desempleo (%)</label><input type="number" id="empDes" step="0.01" oninput="calcular('base')"></div>
+                            <div><label>Formación (%)</label><input type="number" id="empForm" step="0.01" oninput="calcular('base')"></div>
+                            <div><label>FOGASA (%)</label><input type="number" id="empFog" step="0.01" oninput="calcular('base')"></div>
+                            <div><label>MEI (%)</label><input type="number" id="empMEI" step="0.01" oninput="calcular('base')"></div>
+                        </div>
+                    </details>
+
+                    <label>Calendario Anual (365 días) <span class="info-icon">i<span class="tooltip-text">Días teóricos que el empleado NO trabaja. Ayuda a calcular los días reales facturables.</span></span></label>
+                    <div class="cal-grid">
+                        <div><label>Fines de semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
+                        <div><label>Festivos</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
+                        <div><label>Vacaciones (hábiles)</label><input type="number" id="vacaciones" value="30" oninput="calcular('base')"></div>
+                        <div><label>Previsión Bajas (días)</label><input type="number" id="bajas" value="0" oninput="calcular('base')" style="border-color: #f87171;"></div>
+                    </div>
+
+                    <div class="box-sustitucion">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="activarSustitucion" onchange="toggleSustitucion()" checked>
+                            <strong>Sustituir Vacaciones <span class="info-icon" style="background:#1e3a8a;">i<span class="tooltip-text">Calcula el impacto de contratar un sustituto durante el mes de vacaciones (asumido en Agosto). Recuperas la facturación pero pagas dos sueldos.</span></span></strong>
+                        </label>
+                        <div id="opcionesSustitucion" style="display: block; margin-top: 10px;">
+                            <label style="margin-top: 0; font-size: 0.85em;">Perfil del Sustituto:</label>
+                            <select id="perfilSustituto" onchange="calcular('base')">
+                                <option value="cee">♿ Sustituto CEE (0% Seguridad Social)</option>
+                                <option value="normal" selected>🏢 Sustituto Estándar (SS Ordinaria)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label>Margen de Beneficio Objetivo (%) <span class="info-icon">i<span class="tooltip-text">Porcentaje de beneficio neto que quieres obtener por encima del coste real del trabajador.</span></span></label>
+                    <input type="number" id="margen" value="20" step="0.1" oninput="calcular('margen')">
                 </div>
 
-                <div class="result-row" style="background: #f1f5f9; padding: 10px; margin: 15px -10px 0 -10px; border-radius: 5px 5px 0 0; border-bottom: none;">
-                    <span>Coste Total Operativo Anual: <span class="info-icon" style="background:#0f172a;">i<span class="tooltip-text">Suma del Salario + SS + Costes Indirectos anuales + Sustitución (si está activa).</span></span></span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
-                </div>
-                <div class="result-row" style="background: #f8fafc; padding: 5px 10px 10px 10px; margin: 0 -10px 0 -10px; border-radius: 0 0 5px 5px; font-size: 0.95em; border-bottom: 1px dashed #cbd5e1;">
-                    <span style="color: #64748b;">↳ Coste Medio Mensual (Empresa):</span>
-                    <span class="result-value" id="resCosteMensual" style="color: #475569;">0,00 €/mes</span>
-                </div>
+                <!-- Panel 2: Análisis Financiero -->
+                <div class="panel">
+                    <div class="titulo-panel">2. Análisis Financiero y Nómina</div>
 
-                <div class="result-row"><span id="labelHorasRes">Horas Facturables:</span><span class="result-value" id="resHoras">0 h</span></div>
-                <div class="result-row" style="color: #e74c3c;"><span>Punto Muerto (Coste Real/h): <span class="info-icon" style="background:#e74c3c;">i<span class="tooltip-text">Precio de coste por hora trabajada. Vender por debajo de este precio generará pérdidas a final de año.</span></span></span><span class="result-value" id="resBreakeven">0,00 €/h</span></div>
+                    <div class="result-row"><span>Base Cotización Anual (Titular):</span><span class="result-value" id="resBaseCotizacion">0,00 €</span></div>
+                    <div class="result-row"><span>Coste SS Titular:</span><span class="result-value" id="resCosteSS">0,00 €</span></div>
+                    
+                    <div id="rowCosteSustitucion" class="result-row" style="display: flex; color: #2563eb;">
+                        <span>Coste Sustitución (1 Mes):</span>
+                        <span class="result-value" id="resCosteSustitucion">0,00 €</span>
+                    </div>
 
-                <div class="highlight-box">
-                    <div class="highlight-title">Tarifa Comercial Sugerida (€/h)</div>
-                    <div style="display: flex; gap: 15px; margin-top: 10px; align-items: center;">
-                        <input type="range" id="tarifaSlider" min="5" max="60" step="0.1" style="flex-grow: 1;" oninput="syncTarifa('slider')">
-                        <input type="number" id="tarifaInput" value="0.00" step="0.5" style="width: 90px; font-size: 1.2em; font-weight: bold; color: #2563eb; background: transparent; border: 1px solid #93c5fd;" oninput="syncTarifa('input')">
+                    <div class="result-row" style="background: #f1f5f9; padding: 10px; margin: 15px -10px 0 -10px; border-radius: 5px 5px 0 0; border-bottom: none;">
+                        <span>Coste Total Operativo Anual: <span class="info-icon" style="background:#0f172a;">i<span class="tooltip-text">Suma del Salario + SS + Costes Indirectos anuales + Sustitución (si está activa).</span></span></span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
+                    </div>
+                    <div class="result-row" style="background: #f8fafc; padding: 5px 10px 10px 10px; margin: 0 -10px 0 -10px; border-radius: 0 0 5px 5px; font-size: 0.95em; border-bottom: 1px dashed #cbd5e1;">
+                        <span style="color: #64748b;">↳ Coste Medio Mensual (Empresa):</span>
+                        <span class="result-value" id="resCosteMensual" style="color: #475569;">0,00 €/mes</span>
+                    </div>
+
+                    <div class="result-row"><span id="labelHorasRes">Horas Facturables:</span><span class="result-value" id="resHoras">0 h</span></div>
+                    <div class="result-row" style="color: #e74c3c;"><span>Punto Muerto (Coste Real/h): <span class="info-icon" style="background:#e74c3c;">i<span class="tooltip-text">Precio de coste por hora trabajada. Vender por debajo de este precio generará pérdidas a final de año.</span></span></span><span class="result-value" id="resBreakeven">0,00 €/h</span></div>
+
+                    <div class="highlight-box">
+                        <div class="highlight-title">Tarifa Comercial Sugerida (€/h)</div>
+                        <div style="display: flex; gap: 15px; margin-top: 10px; align-items: center;">
+                            <input type="range" id="tarifaSlider" min="5" max="60" step="0.1" style="flex-grow: 1;" oninput="syncTarifa('slider')">
+                            <input type="number" id="tarifaInput" value="0.00" step="0.5" style="width: 90px; font-size: 1.2em; font-weight: bold; color: #2563eb; background: transparent; border: 1px solid #93c5fd;" oninput="syncTarifa('input')">
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #bfdbfe;">
+                            <div style="display: flex; justify-content: space-between; font-size: 1.05em; color: #1e3a8a; font-weight: bold;">
+                                <span>Cuota Mensual Cliente (12 meses):</span>
+                                <span id="resFacturacionMensual">0,00 €/mes</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.95em; color: #059669; font-weight: bold;">
+                                <span>Beneficio Neto Anual:</span>
+                                <span id="resBeneficio">0,00 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <details style="border-color: #10b981;" open>
+                        <summary style="color: #10b981;">Liquidez del Trabajador Titular (Nómina)</summary>
+                        <div class="cal-grid" style="border:none; padding:0;">
+                            <div>
+                                <label>Retención IRPF (%)</label>
+                                <input type="number" id="irpf" step="0.1" oninput="calcular('base')">
+                            </div>
+                            <div>
+                                <label>Número de pagas <span class="info-icon">i<span class="tooltip-text">Afecta al bolsillo del trabajador y al flujo de caja mensual de la empresa (doble sueldo en Junio/Diciembre si son 14 pagas).</span></span></label>
+                                <select id="pagas" onchange="calcular('base')"><option value="12">12 pagas</option><option value="14">14 pagas</option></select>
+                            </div>
+                        </div>
+                        <div class="neto-box">Neto a percibir (Bolsillo Trabajador): <span id="resNeto" style="float:right;">0,00 €</span></div>
+                    </details>
+                </div>
+            </div>
+
+            <div class="titulo-panel">3. Flujo de Caja Mensual Estimado</div>
+            <div class="canvas-container"><canvas id="graficoFlujo"></canvas></div>
+        </div>
+
+        <!-- Widget Flotante Comparador -->
+        <div id="widgetComparador">
+            <div id="widgetHeader">
+                <span>📊 Comparador de Escenarios</span>
+                <span style="cursor: pointer;" onclick="toggleWidget()">▼</span>
+            </div>
+            <div id="widgetContent">
+                <div style="display: flex; justify-content: space-between; gap: 10px;">
+                    <button class="btn-guardar" onclick="guardarEscenario('A')">Guardar A</button>
+                    <button class="btn-guardar" style="background: #10b981;" onclick="guardarEscenario('B')">Guardar B</button>
+                </div>
+                <table class="comp-table">
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Escenario A</th>
+                        <th>Escenario B</th>
+                    </tr>
+                    <tr>
+                        <td>Tarifa Venta</td>
+                        <td id="comp-tarifa-a">-</td>
+                        <td id="comp-tarifa-b">-</td>
+                    </tr>
+                    <tr>
+                        <td>Beneficio Anual</td>
+                        <td id="comp-ben-a">-</td>
+                        <td id="comp-ben-b">-</td>
+                    </tr>
+                    <tr>
+                        <td>Margen</td>
+                        <td id="comp-mar-a">-</td>
+                        <td id="comp-mar-b">-</td>
+                    </tr>
+                </table>
+                <div id="comp-resultado" class="comp-diff" style="display: none; background: #f1f5f9; color: #333;"></div>
+            </div>
+        </div>
+    </div> <!-- FIN INTERFAZ CALCULADORA -->
+
+    <!-- B. MODAL DE VISTA PREVIA (Presupuesto Interactivo) -->
+    <div id="modalPresupuesto" class="modal-overlay">
+        <div class="modal-content">
+            <!-- Botones de Acción (Se ocultan al imprimir) -->
+            <div class="modal-actions no-print">
+                <button class="btn-perfil" style="background: #94a3b8; max-width: 150px;" onclick="cerrarVistaPrevia()">❌ Cancelar</button>
+                <button class="btn-perfil" style="background: #10b981; max-width: 250px;" onclick="window.print()">🖨️ Imprimir / Descargar PDF</button>
+            </div>
+
+            <!-- Cabecera Editable -->
+            <div class="pdf-header">
+                <div style="width: 60%;">
+                    <h1 class="pdf-title" contenteditable="true" class="editable" spellcheck="false">Propuesta de Servicios</h1>
+                    <p style="margin: 10px 0 0 0; color: #64748b; font-size: 16px;">
+                        De: <span class="editable" contenteditable="true" placeholder="[Nombre de tu Empresa]" style="font-weight: bold; color: #333;">[Haz clic aquí para escribir tu Empresa]</span><br>
+                        Para: <span class="editable" contenteditable="true" placeholder="[Nombre del Cliente]" style="font-weight: bold; color: #333;">[Haz clic aquí para escribir Empresa Cliente]</span>
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <div class="pdf-date">Fecha: <span class="editable" contenteditable="true" id="pdf-fecha-actual"></span></div>
+                    <div style="margin-top: 10px; color: #94a3b8; font-size: 12px; font-style: italic;" class="no-print">
+                        (Haz clic en los textos subrayados para editarlos)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción Editable -->
+            <div class="pdf-section">
+                <h3 class="editable" contenteditable="true">Descripción del Proyecto</h3>
+                <p class="editable" contenteditable="true" style="color: #475569; line-height: 1.6; width: 100%; min-height: 50px;">
+                    La presente propuesta detalla las condiciones económicas para la prestación de servicios en formato de cobertura continua. 
+                    El servicio asegura la continuidad operativa, gestionando integralmente los perfiles solicitados, incluyendo periodos vacacionales.
+                </p>
+            </div>
+
+            <!-- Tabla de Datos Matemáticos (Se rellena sola pero puedes tocarla) -->
+            <div class="pdf-section">
+                <h3>Detalle Económico</h3>
+                <table class="pdf-table">
+                    <thead>
+                        <tr>
+                            <th class="editable" contenteditable="true">Concepto</th>
+                            <th style="text-align: right;">Volumen</th>
+                            <th style="text-align: right;">Tarifa / Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong class="editable" contenteditable="true">Servicio de Asistencia / Especialista</strong><br>
+                                <span style="font-size:12px; color:#64748b;">(Jornada: <span id="pdf-jornada" class="editable" contenteditable="true">40h Semanales</span>)</span>
+                            </td>
+                            <td style="text-align: right;"><span id="pdf-horas-anuales" class="editable" contenteditable="true">0</span> horas / año</td>
+                            <td class="monto editable" contenteditable="true" id="pdf-tarifa-hora">0,00 €/h</td>
+                        </tr>
+                        <tr id="pdf-fila-sustitucion">
+                            <td>
+                                <strong class="editable" contenteditable="true">Cobertura Ininterrumpida (12 Meses)</strong><br>
+                                <span class="editable" contenteditable="true" style="font-size:12px; color:#64748b;">Sustitución de periodo vacacional incluida</span>
+                            </td>
+                            <td style="text-align: right;">1 Servicio</td>
+                            <td class="monto editable" contenteditable="true">Incluido</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totales -->
+            <div class="pdf-total-box">
+                <div class="pdf-total-content">
+                    <div class="pdf-total-row">
+                        <span class="editable" contenteditable="true" style="color: #475569;">Cuota Mensual (Base)</span>
+                        <strong class="editable" contenteditable="true" id="pdf-cuota-mensual">0,00 €</strong>
+                    </div>
+                    <div class="pdf-total-row">
+                        <span class="editable" contenteditable="true" style="color: #475569;">Presupuesto Anual</span>
+                        <strong class="editable" contenteditable="true" id="pdf-presupuesto-anual">0,00 €</strong>
                     </div>
                     
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #bfdbfe;">
-                        <div style="display: flex; justify-content: space-between; font-size: 1.05em; color: #1e3a8a; font-weight: bold;">
-                            <span>Cuota Mensual Cliente (12 meses):</span>
-                            <span id="resFacturacionMensual">0,00 €/mes</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.95em; color: #059669; font-weight: bold;">
-                            <span>Beneficio Neto Anual:</span>
-                            <span id="resBeneficio">0,00 €</span>
-                        </div>
+                    <div class="pdf-total-final">
+                        <span class="editable" contenteditable="true">Base Imponible Mensual</span>
+                        <span class="editable" contenteditable="true" id="pdf-total-final">0,00 €/mes</span>
                     </div>
                 </div>
-
-                <details style="border-color: #10b981;">
-                    <summary style="color: #10b981;">Liquidez del Trabajador Titular (Nómina)</summary>
-                    <div class="cal-grid" style="border:none; padding:0;">
-                        <div>
-                            <label>Retención IRPF (%)</label>
-                            <input type="number" id="irpf" step="0.1" oninput="calcular('base')">
-                        </div>
-                        <div>
-                            <label>Número de pagas <span class="info-icon">i<span class="tooltip-text">Afecta al bolsillo del trabajador y al flujo de caja mensual de la empresa (doble sueldo en Junio/Diciembre si son 14 pagas).</span></span></label>
-                            <select id="pagas" onchange="calcular('base')"><option value="12">12 pagas</option><option value="14">14 pagas</option></select>
-                        </div>
-                    </div>
-                    <div class="neto-box">Neto a percibir (Bolsillo Trabajador): <span id="resNeto" style="float:right;">0,00 €</span></div>
-                </details>
             </div>
-        </div>
 
-        <div class="titulo-panel">3. Flujo de Caja Mensual Estimado</div>
-        <div class="canvas-container"><canvas id="graficoFlujo"></canvas></div>
-    </div>
-
-    <!-- Widget Flotante Comparador -->
-    <div id="widgetComparador">
-        <div id="widgetHeader">
-            <span>📊 Comparador de Escenarios</span>
-            <span style="cursor: pointer;" onclick="toggleWidget()">▼</span>
-        </div>
-        <div id="widgetContent">
-            <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <button class="btn-guardar" onclick="guardarEscenario('A')">Guardar A</button>
-                <button class="btn-guardar" style="background: #10b981;" onclick="guardarEscenario('B')">Guardar B</button>
+            <!-- Footer Legal Editable -->
+            <div class="pdf-footer">
+                <p class="editable" contenteditable="true"><strong>Condiciones Comerciales:</strong></p>
+                <p class="editable" contenteditable="true">Impuestos no incluidos en los importes mostrados (Añadir IVA aplicable).<br>
+                Validez de la oferta: 30 días naturales desde la fecha de emisión del documento. Forma de pago a 30 días.</p>
             </div>
-            <table class="comp-table">
-                <tr>
-                    <th>Concepto</th>
-                    <th>Escenario A</th>
-                    <th>Escenario B</th>
-                </tr>
-                <tr>
-                    <td>Tarifa Venta</td>
-                    <td id="comp-tarifa-a">-</td>
-                    <td id="comp-tarifa-b">-</td>
-                </tr>
-                <tr>
-                    <td>Beneficio Anual</td>
-                    <td id="comp-ben-a">-</td>
-                    <td id="comp-ben-b">-</td>
-                </tr>
-                <tr>
-                    <td>Margen</td>
-                    <td id="comp-mar-a">-</td>
-                    <td id="comp-mar-b">-</td>
-                </tr>
-            </table>
-            <div id="comp-resultado" class="comp-diff" style="display: none; background: #f1f5f9; color: #333;"></div>
         </div>
     </div>
 
+    <!-- C. SCRIPT JAVASCRIPT -->
     <script>
         let chartFlujo = null;
         let estadoEscenarios = { A: null, B: null };
 
-        // --- Lógica del Widget Arrastrable ---
+        // --- FUNCIONES DEL MODAL DE PRESUPUESTO ---
+        function abrirVistaPreviaPDF() {
+            // 1. Obtener valores de la calculadora
+            const tarifaFinal = parseFloat(document.getElementById('tarifaInput').value);
+            const horasFacturables = parseFloat(document.getElementById('resHoras').innerText.replace(' h', ''));
+            const tipoJornada = document.getElementById('tipoJornada').options[document.getElementById('tipoJornada').selectedIndex].text;
+            const horasJornada = document.getElementById('horasJornada').value;
+            
+            const presupuestoAnual = tarifaFinal * horasFacturables;
+            const cuotaMensual = presupuestoAnual / 12;
+
+            // 2. Volcar datos en el modal
+            document.getElementById('pdf-fecha-actual').innerText = new Date().toLocaleDateString('es-ES');
+            document.getElementById('pdf-jornada').innerText = horasJornada + "h " + tipoJornada;
+            document.getElementById('pdf-horas-anuales').innerText = horasFacturables.toFixed(0);
+            document.getElementById('pdf-tarifa-hora').innerText = tarifaFinal.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/h";
+            
+            document.getElementById('pdf-cuota-mensual').innerText = cuotaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-presupuesto-anual').innerText = presupuestoAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-total-final').innerText = cuotaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+
+            if(!document.getElementById('activarSustitucion').checked) {
+                document.getElementById('pdf-fila-sustitucion').style.display = 'none';
+            } else {
+                document.getElementById('pdf-fila-sustitucion').style.display = 'table-row';
+            }
+
+            // 3. Mostrar el modal
+            document.getElementById('modalPresupuesto').style.display = 'block';
+        }
+
+        function cerrarVistaPrevia() {
+            document.getElementById('modalPresupuesto').style.display = 'none';
+        }
+
+
+        // --- RESTO DE LA LÓGICA DE LA CALCULADORA ---
         const widget = document.getElementById('widgetComparador');
         const header = document.getElementById('widgetHeader');
         let isDragging = false, offsetX, offsetY;
@@ -251,8 +444,8 @@
             if (!isDragging) return;
             widget.style.left = (e.clientX - offsetX) + 'px';
             widget.style.top = (e.clientY - offsetY) + 'px';
-            widget.style.bottom = 'auto'; // Anula el 'bottom' inicial
-            widget.style.right = 'auto'; // Anula el 'right' inicial
+            widget.style.bottom = 'auto';
+            widget.style.right = 'auto';
         });
         document.addEventListener('mouseup', () => isDragging = false);
 
@@ -263,7 +456,7 @@
 
         function guardarEscenario(letra) {
             const tarifa = parseFloat(document.getElementById('tarifaInput').value);
-            const beneficio = parseFloat(document.getElementById('resBeneficio').innerText.replace(/\./g, '').replace(',', '.')); // Recoge el num
+            const beneficio = parseFloat(document.getElementById('resBeneficio').innerText.replace(/\./g, '').replace(',', '.'));
             const margen = parseFloat(document.getElementById('margen').value);
 
             estadoEscenarios[letra] = { tarifa, beneficio, margen };
@@ -292,7 +485,6 @@
                 }
             }
         }
-        // -------------------------------------
 
         function toggleSustitucion() {
             const activo = document.getElementById('activarSustitucion').checked;
@@ -349,7 +541,6 @@
             const pagas = parseInt(document.getElementById('pagas').value) || 12;
             let margen = parseFloat(document.getElementById('margen').value) || 0;
             
-            // Nuevo campo Indirectos
             const indirectosMensual = parseFloat(document.getElementById('costeIndirecto').value) || 0;
             const indirectosAnual = indirectosMensual * 12;
 
@@ -390,19 +581,18 @@
 
             if (sustitucionActiva) {
                 const perfilSustituto = document.getElementById('perfilSustituto').value;
-                const salarioMesSustituto = monetarioAnual / 12; // Un mes estándar
+                const salarioMesSustituto = monetarioAnual / 12;
                 const pctSSSustituto = (perfilSustituto === 'cee') ? 0 : 33.65;
                 const costeSSSustituto = salarioMesSustituto * (pctSSSustituto / 100);
 
                 costeTotalSustitucion = salarioMesSustituto + costeSSSustituto;
                 document.getElementById('resCosteSustitucion').innerText = costeTotalSustitucion.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-                diasSustituidosEquivalentes = diasTeoricos / 12; // Promedio de días hábiles de 1 mes
+                diasSustituidosEquivalentes = diasTeoricos / 12; 
             }
 
             const diasFacturables = Math.max(0, diasTeoricos - vacaciones - bajas + diasSustituidosEquivalentes);
             const horasFacturables = diasFacturables * horasDiariasEquivalentes;
             
-            // Total operativo sumando los gastos indirectos
             const costeAnualTotal = costeMonetarioEmpresa + costeSSEmpresa + indirectosAnual + costeTotalSustitucion;
 
             const breakeven = horasFacturables > 0 ? costeAnualTotal / horasFacturables : 0;
@@ -438,20 +628,16 @@
             document.getElementById('resBeneficio').innerText = beneficioAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             document.getElementById('resNeto').innerText = liquidoMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
 
-            // --- Lógica del Flujo de Caja (Impacto de 14 pagas) ---
-            
-            // Separar el sueldo de la SS porque la SS siempre se paga en 12 meses
+            // --- Lógica del Flujo de Caja ---
             const salarioBaseMensual = costeMonetarioEmpresa / pagas; 
             const ssMensual = costeSSEmpresa / 12;
             const costeFijoMesOrdinario = salarioBaseMensual + ssMensual + indirectosMensual;
             
-            // Inicializar array de gastos meses normales
             let gastosMes = Array(12).fill(costeFijoMesOrdinario);
 
-            // Si hay 14 pagas, Junio (índice 5) y Diciembre (índice 11) reciben un sueldo base extra
             if(pagas === 14) {
-                gastosMes[5] += salarioBaseMensual;
-                gastosMes[11] += salarioBaseMensual;
+                gastosMes[5] += salarioBaseMensual; // Junio
+                gastosMes[11] += salarioBaseMensual; // Diciembre
             }
 
             let datosMensuales = [];
@@ -459,15 +645,14 @@
             if (sustitucionActiva) {
                 for(let i = 0; i < 12; i++) {
                     let balanceMes = facturacionMensualPromedio - gastosMes[i];
-                    // En Agosto (índice 7), restamos además el coste total de la sustitución
                     if(i === 7) balanceMes -= costeTotalSustitucion;
                     datosMensuales.push(balanceMes);
                 }
             } else {
                 const facturacionMesActivo = horasFacturables > 0 ? (tarifaFinal * horasFacturables) / 11 : 0;
                 for(let i = 0; i < 12; i++) {
-                    if (i === 7) { // Agosto
-                        datosMensuales.push(-gastosMes[i]); // Factura 0, asume el coste ordinario
+                    if (i === 7) {
+                        datosMensuales.push(-gastosMes[i]); 
                     } else {
                         datosMensuales.push(facturacionMesActivo - gastosMes[i]);
                     }
