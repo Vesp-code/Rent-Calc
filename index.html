@@ -6,7 +6,7 @@
     <title>Calculadora de Rentabilidad Avanzada</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; margin-bottom: 100px; }
         .container { max-width: 1050px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
         .panel { background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
@@ -37,6 +37,24 @@
         .box-sustitucion { background: #fff; border: 1px solid #93c5fd; border-radius: 6px; padding: 12px; margin-top: 15px; }
         .toggle-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95em; color: #1e3a8a; margin: 0; }
         .toggle-label input { width: auto; margin: 0; }
+
+        /* Tooltips CSS */
+        .info-icon { display: inline-flex; justify-content: center; align-items: center; width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; color: white; font-size: 11px; font-weight: bold; font-family: monospace; margin-left: 5px; cursor: help; position: relative; }
+        .info-icon .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #fff; text-align: left; border-radius: 6px; padding: 10px; position: absolute; z-index: 100; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: normal; line-height: 1.4; box-shadow: 0 4px 6px rgba(0,0,0,0.1); pointer-events: none;}
+        .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .info-icon .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent; }
+
+        /* Widget Comparador Flotante */
+        #widgetComparador { position: fixed; bottom: 20px; right: 20px; width: 340px; background: white; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden; border: 1px solid #cbd5e1; }
+        #widgetHeader { background: #1e293b; color: white; padding: 12px 15px; font-weight: bold; cursor: grab; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        #widgetHeader:active { cursor: grabbing; }
+        #widgetContent { padding: 15px; }
+        .btn-guardar { width: 48%; padding: 8px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-guardar:hover { background: #2980b9; }
+        .comp-table { width: 100%; font-size: 0.9em; margin-top: 15px; border-collapse: collapse; }
+        .comp-table th, .comp-table td { padding: 8px 5px; border-bottom: 1px solid #e2e8f0; text-align: right; }
+        .comp-table th:first-child, .comp-table td:first-child { text-align: left; font-weight: bold; color: #475569;}
+        .comp-diff { font-weight: bold; padding: 10px; margin-top: 15px; border-radius: 5px; text-align: center; font-size: 0.95em; }
     </style>
 </head>
 <body>
@@ -54,7 +72,7 @@
             <div class="panel">
                 <div class="titulo-panel">1. Estructura de Costes (Empresa)</div>
 
-                <label>Formato y Salario Monetario Bruto</label>
+                <label>Formato y Salario Monetario Bruto <span class="info-icon">i<span class="tooltip-text">Salario bruto antes de impuestos que cobrará el trabajador.</span></span></label>
                 <div class="flex-row">
                     <select id="tipoSalario" onchange="calcular('base')" style="width: 40%; margin-top: 0;">
                         <option value="anual">Anual</option>
@@ -64,8 +82,8 @@
                     <input type="number" id="valorSalario" value="10" oninput="calcular('base')" style="width: 60%; margin-top: 0;">
                 </div>
 
-                <label>Retribución en Especie Anual (€)</label>
-                <input type="number" id="especie" value="0" oninput="calcular('base')">
+                <label>Costes Indirectos Fijos (€/mes) <span class="info-icon">i<span class="tooltip-text">Gastos de estructura asociados al puesto: Gestoría, EPIs, licencias de software, renting, etc. Se suma al coste operativo.</span></span></label>
+                <input type="number" id="costeIndirecto" value="0" oninput="calcular('base')">
 
                 <label>Jornada de Trabajo (Horas)</label>
                 <div class="flex-row">
@@ -89,7 +107,7 @@
                     </div>
                 </details>
 
-                <label>Calendario Anual (365 días)</label>
+                <label>Calendario Anual (365 días) <span class="info-icon">i<span class="tooltip-text">Días teóricos que el empleado NO trabaja. Ayuda a calcular los días reales facturables.</span></span></label>
                 <div class="cal-grid">
                     <div><label>Fines de semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
                     <div><label>Festivos</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
@@ -100,7 +118,7 @@
                 <div class="box-sustitucion">
                     <label class="toggle-label">
                         <input type="checkbox" id="activarSustitucion" onchange="toggleSustitucion()" checked>
-                        <strong>Sustituir Vacaciones (Agosto completo)</strong>
+                        <strong>Sustituir Vacaciones <span class="info-icon" style="background:#1e3a8a;">i<span class="tooltip-text">Calcula el impacto de contratar un sustituto durante el mes de vacaciones (asumido en Agosto). Recuperas la facturación pero pagas dos sueldos.</span></span></strong>
                     </label>
                     <div id="opcionesSustitucion" style="display: block; margin-top: 10px;">
                         <label style="margin-top: 0; font-size: 0.85em;">Perfil del Sustituto:</label>
@@ -111,7 +129,7 @@
                     </div>
                 </div>
 
-                <label>Margen de Beneficio Objetivo (%)</label>
+                <label>Margen de Beneficio Objetivo (%) <span class="info-icon">i<span class="tooltip-text">Porcentaje de beneficio neto que quieres obtener por encima del coste real del trabajador.</span></span></label>
                 <input type="number" id="margen" value="20" step="0.1" oninput="calcular('margen')">
             </div>
 
@@ -128,7 +146,7 @@
                 </div>
 
                 <div class="result-row" style="background: #f1f5f9; padding: 10px; margin: 15px -10px 0 -10px; border-radius: 5px 5px 0 0; border-bottom: none;">
-                    <span>Coste Total Operativo Anual:</span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
+                    <span>Coste Total Operativo Anual: <span class="info-icon" style="background:#0f172a;">i<span class="tooltip-text">Suma del Salario + SS + Costes Indirectos anuales + Sustitución (si está activa).</span></span></span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
                 </div>
                 <div class="result-row" style="background: #f8fafc; padding: 5px 10px 10px 10px; margin: 0 -10px 0 -10px; border-radius: 0 0 5px 5px; font-size: 0.95em; border-bottom: 1px dashed #cbd5e1;">
                     <span style="color: #64748b;">↳ Coste Medio Mensual (Empresa):</span>
@@ -136,7 +154,7 @@
                 </div>
 
                 <div class="result-row"><span id="labelHorasRes">Horas Facturables:</span><span class="result-value" id="resHoras">0 h</span></div>
-                <div class="result-row" style="color: #e74c3c;"><span>Punto Muerto (Coste Real/h):</span><span class="result-value" id="resBreakeven">0,00 €/h</span></div>
+                <div class="result-row" style="color: #e74c3c;"><span>Punto Muerto (Coste Real/h): <span class="info-icon" style="background:#e74c3c;">i<span class="tooltip-text">Precio de coste por hora trabajada. Vender por debajo de este precio generará pérdidas a final de año.</span></span></span><span class="result-value" id="resBreakeven">0,00 €/h</span></div>
 
                 <div class="highlight-box">
                     <div class="highlight-title">Tarifa Comercial Sugerida (€/h)</div>
@@ -165,11 +183,11 @@
                             <input type="number" id="irpf" step="0.1" oninput="calcular('base')">
                         </div>
                         <div>
-                            <label>Número de pagas</label>
+                            <label>Número de pagas <span class="info-icon">i<span class="tooltip-text">Afecta al bolsillo del trabajador y al flujo de caja mensual de la empresa (doble sueldo en Junio/Diciembre si son 14 pagas).</span></span></label>
                             <select id="pagas" onchange="calcular('base')"><option value="12">12 pagas</option><option value="14">14 pagas</option></select>
                         </div>
                     </div>
-                    <div class="neto-box">Neto a percibir (Mensual): <span id="resNeto" style="float:right;">0,00 €</span></div>
+                    <div class="neto-box">Neto a percibir (Bolsillo Trabajador): <span id="resNeto" style="float:right;">0,00 €</span></div>
                 </details>
             </div>
         </div>
@@ -178,8 +196,103 @@
         <div class="canvas-container"><canvas id="graficoFlujo"></canvas></div>
     </div>
 
+    <!-- Widget Flotante Comparador -->
+    <div id="widgetComparador">
+        <div id="widgetHeader">
+            <span>📊 Comparador de Escenarios</span>
+            <span style="cursor: pointer;" onclick="toggleWidget()">▼</span>
+        </div>
+        <div id="widgetContent">
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                <button class="btn-guardar" onclick="guardarEscenario('A')">Guardar A</button>
+                <button class="btn-guardar" style="background: #10b981;" onclick="guardarEscenario('B')">Guardar B</button>
+            </div>
+            <table class="comp-table">
+                <tr>
+                    <th>Concepto</th>
+                    <th>Escenario A</th>
+                    <th>Escenario B</th>
+                </tr>
+                <tr>
+                    <td>Tarifa Venta</td>
+                    <td id="comp-tarifa-a">-</td>
+                    <td id="comp-tarifa-b">-</td>
+                </tr>
+                <tr>
+                    <td>Beneficio Anual</td>
+                    <td id="comp-ben-a">-</td>
+                    <td id="comp-ben-b">-</td>
+                </tr>
+                <tr>
+                    <td>Margen</td>
+                    <td id="comp-mar-a">-</td>
+                    <td id="comp-mar-b">-</td>
+                </tr>
+            </table>
+            <div id="comp-resultado" class="comp-diff" style="display: none; background: #f1f5f9; color: #333;"></div>
+        </div>
+    </div>
+
     <script>
         let chartFlujo = null;
+        let estadoEscenarios = { A: null, B: null };
+
+        // --- Lógica del Widget Arrastrable ---
+        const widget = document.getElementById('widgetComparador');
+        const header = document.getElementById('widgetHeader');
+        let isDragging = false, offsetX, offsetY;
+
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - widget.getBoundingClientRect().left;
+            offsetY = e.clientY - widget.getBoundingClientRect().top;
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            widget.style.left = (e.clientX - offsetX) + 'px';
+            widget.style.top = (e.clientY - offsetY) + 'px';
+            widget.style.bottom = 'auto'; // Anula el 'bottom' inicial
+            widget.style.right = 'auto'; // Anula el 'right' inicial
+        });
+        document.addEventListener('mouseup', () => isDragging = false);
+
+        function toggleWidget() {
+            const content = document.getElementById('widgetContent');
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function guardarEscenario(letra) {
+            const tarifa = parseFloat(document.getElementById('tarifaInput').value);
+            const beneficio = parseFloat(document.getElementById('resBeneficio').innerText.replace(/\./g, '').replace(',', '.')); // Recoge el num
+            const margen = parseFloat(document.getElementById('margen').value);
+
+            estadoEscenarios[letra] = { tarifa, beneficio, margen };
+
+            document.getElementById(`comp-tarifa-${letra.toLowerCase()}`).innerText = tarifa.toFixed(2) + " €/h";
+            document.getElementById(`comp-ben-${letra.toLowerCase()}`).innerText = beneficio.toLocaleString('es-ES', {minimumFractionDigits: 0}) + " €";
+            document.getElementById(`comp-mar-${letra.toLowerCase()}`).innerText = margen.toFixed(1) + "%";
+
+            compararResultados();
+        }
+
+        function compararResultados() {
+            const divRes = document.getElementById('comp-resultado');
+            if(estadoEscenarios.A && estadoEscenarios.B) {
+                const diff = estadoEscenarios.B.beneficio - estadoEscenarios.A.beneficio;
+                divRes.style.display = 'block';
+                if(diff > 0) {
+                    divRes.style.background = '#dcfce7'; divRes.style.color = '#166534';
+                    divRes.innerHTML = `B genera <b>+${diff.toLocaleString('es-ES', {minimumFractionDigits: 0})} €</b> al año frente a A.`;
+                } else if (diff < 0) {
+                    divRes.style.background = '#fee2e2'; divRes.style.color = '#991b1b';
+                    divRes.innerHTML = `B genera <b>${diff.toLocaleString('es-ES', {minimumFractionDigits: 0})} €</b> (Pérdida) frente a A.`;
+                } else {
+                    divRes.style.background = '#f1f5f9'; divRes.style.color = '#334155';
+                    divRes.innerHTML = `Ambos escenarios generan el mismo beneficio.`;
+                }
+            }
+        }
+        // -------------------------------------
 
         function toggleSustitucion() {
             const activo = document.getElementById('activarSustitucion').checked;
@@ -206,7 +319,6 @@
             document.getElementById('empForm').value = isCEE ? 0 : 0.60;
             document.getElementById('empFog').value = isCEE ? 0 : 0.20;
             document.getElementById('empMEI').value = isCEE ? 0 : 0.75;
-
             document.getElementById('irpf').value = isCEE ? 2.0 : 10.0;
 
             const btnNormal = document.getElementById('btnNormal');
@@ -234,22 +346,21 @@
         function calcular(origen) {
             const tipoSalario = document.getElementById('tipoSalario').value;
             const valorSalario = parseFloat(document.getElementById('valorSalario').value) || 0;
-            const especieAnual = parseFloat(document.getElementById('especie').value) || 0;
             const pagas = parseInt(document.getElementById('pagas').value) || 12;
             let margen = parseFloat(document.getElementById('margen').value) || 0;
+            
+            // Nuevo campo Indirectos
+            const indirectosMensual = parseFloat(document.getElementById('costeIndirecto').value) || 0;
+            const indirectosAnual = indirectosMensual * 12;
 
             const tipoJornada = document.getElementById('tipoJornada').value;
             const horasJornada = parseFloat(document.getElementById('horasJornada').value) || 0;
             const diasTeoricos = Math.max(0, 365 - (parseFloat(document.getElementById('finesSemana').value) || 0) - (parseFloat(document.getElementById('festivos').value) || 0));
 
             let horasDiariasEquivalentes = 0;
-            if (tipoJornada === 'diaria') {
-                horasDiariasEquivalentes = horasJornada;
-            } else if (tipoJornada === 'semanal') {
-                horasDiariasEquivalentes = horasJornada / 5;
-            } else if (tipoJornada === 'mensual') {
-                horasDiariasEquivalentes = (horasJornada * 12) / (diasTeoricos || 1);
-            }
+            if (tipoJornada === 'diaria') horasDiariasEquivalentes = horasJornada;
+            else if (tipoJornada === 'semanal') horasDiariasEquivalentes = horasJornada / 5;
+            else if (tipoJornada === 'mensual') horasDiariasEquivalentes = (horasJornada * 12) / (diasTeoricos || 1);
 
             const totalSSEmpresaPorcentaje = (parseFloat(document.getElementById('empCC').value) || 0) +
                                              (parseFloat(document.getElementById('empAT').value) || 0) +
@@ -265,11 +376,11 @@
             const bajas = parseFloat(document.getElementById('bajas').value) || 0;
 
             let monetarioAnual = 0;
-            if (tipoSalario === 'anual') { monetarioAnual = valorSalario; }
-            else if (tipoSalario === 'mensual') { monetarioAnual = valorSalario * pagas; }
-            else if (tipoSalario === 'hora') { monetarioAnual = valorSalario * horasDiariasEquivalentes * diasTeoricos; }
+            if (tipoSalario === 'anual') monetarioAnual = valorSalario;
+            else if (tipoSalario === 'mensual') monetarioAnual = valorSalario * pagas;
+            else if (tipoSalario === 'hora') monetarioAnual = valorSalario * horasDiariasEquivalentes * diasTeoricos;
 
-            const baseCotizacionAnual = monetarioAnual + especieAnual;
+            const baseCotizacionAnual = monetarioAnual;
             const costeMonetarioEmpresa = Math.max(0, monetarioAnual - (bajas * (monetarioAnual / 365)));
             const costeSSEmpresa = baseCotizacionAnual * (totalSSEmpresaPorcentaje / 100);
             
@@ -279,18 +390,20 @@
 
             if (sustitucionActiva) {
                 const perfilSustituto = document.getElementById('perfilSustituto').value;
-                const salarioMesSustituto = monetarioAnual / 12;
+                const salarioMesSustituto = monetarioAnual / 12; // Un mes estándar
                 const pctSSSustituto = (perfilSustituto === 'cee') ? 0 : 33.65;
                 const costeSSSustituto = salarioMesSustituto * (pctSSSustituto / 100);
 
                 costeTotalSustitucion = salarioMesSustituto + costeSSSustituto;
                 document.getElementById('resCosteSustitucion').innerText = costeTotalSustitucion.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-                diasSustituidosEquivalentes = diasTeoricos / 12;
+                diasSustituidosEquivalentes = diasTeoricos / 12; // Promedio de días hábiles de 1 mes
             }
 
             const diasFacturables = Math.max(0, diasTeoricos - vacaciones - bajas + diasSustituidosEquivalentes);
             const horasFacturables = diasFacturables * horasDiariasEquivalentes;
-            const costeAnualTotal = costeMonetarioEmpresa + especieAnual + costeSSEmpresa + costeTotalSustitucion;
+            
+            // Total operativo sumando los gastos indirectos
+            const costeAnualTotal = costeMonetarioEmpresa + costeSSEmpresa + indirectosAnual + costeTotalSustitucion;
 
             const breakeven = horasFacturables > 0 ? costeAnualTotal / horasFacturables : 0;
             let tarifaFinal = 0;
@@ -313,7 +426,7 @@
 
             const deduccionesObrera = baseCotizacionAnual * (6.50 / 100);
             const deduccionesIRPF = baseCotizacionAnual * ((parseFloat(document.getElementById('irpf').value) || 0) / 100);
-            const liquidoMensual = (baseCotizacionAnual - deduccionesObrera - deduccionesIRPF - especieAnual) / pagas;
+            const liquidoMensual = (baseCotizacionAnual - deduccionesObrera - deduccionesIRPF) / pagas;
 
             document.getElementById('resBaseCotizacion').innerText = baseCotizacionAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             document.getElementById('resCosteSS').innerText = costeSSEmpresa.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
@@ -321,34 +434,44 @@
             document.getElementById('resCosteMensual').innerText = costeMensualPromedio.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
             document.getElementById('resHoras').innerText = horasFacturables.toFixed(0) + " h";
             document.getElementById('resBreakeven').innerText = breakeven.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/h";
-            
             document.getElementById('resFacturacionMensual').innerText = facturacionMensualPromedio.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
             document.getElementById('resBeneficio').innerText = beneficioAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             document.getElementById('resNeto').innerText = liquidoMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
 
-            const costeOrdinarioMensual = (costeMonetarioEmpresa + especieAnual + costeSSEmpresa) / 12;
+            // --- Lógica del Flujo de Caja (Impacto de 14 pagas) ---
+            
+            // Separar el sueldo de la SS porque la SS siempre se paga en 12 meses
+            const salarioBaseMensual = costeMonetarioEmpresa / pagas; 
+            const ssMensual = costeSSEmpresa / 12;
+            const costeFijoMesOrdinario = salarioBaseMensual + ssMensual + indirectosMensual;
+            
+            // Inicializar array de gastos meses normales
+            let gastosMes = Array(12).fill(costeFijoMesOrdinario);
+
+            // Si hay 14 pagas, Junio (índice 5) y Diciembre (índice 11) reciben un sueldo base extra
+            if(pagas === 14) {
+                gastosMes[5] += salarioBaseMensual;
+                gastosMes[11] += salarioBaseMensual;
+            }
+
             let datosMensuales = [];
 
             if (sustitucionActiva) {
-                const balanceMesNormal = facturacionMensualPromedio - costeOrdinarioMensual;
-                const balanceMesAgosto = facturacionMensualPromedio - (costeOrdinarioMensual + costeTotalSustitucion);
-
-                datosMensuales = [
-                    balanceMesNormal, balanceMesNormal, balanceMesNormal,
-                    balanceMesNormal, balanceMesNormal, balanceMesNormal,
-                    balanceMesNormal, balanceMesAgosto, balanceMesNormal,
-                    balanceMesNormal, balanceMesNormal, balanceMesNormal
-                ];
+                for(let i = 0; i < 12; i++) {
+                    let balanceMes = facturacionMensualPromedio - gastosMes[i];
+                    // En Agosto (índice 7), restamos además el coste total de la sustitución
+                    if(i === 7) balanceMes -= costeTotalSustitucion;
+                    datosMensuales.push(balanceMes);
+                }
             } else {
                 const facturacionMesActivo = horasFacturables > 0 ? (tarifaFinal * horasFacturables) / 11 : 0;
-                const balanceMesNormal = facturacionMesActivo - costeOrdinarioMensual;
-                const balanceAgostoVacio = -costeOrdinarioMensual;
-
-                datosMensuales = [
-                    ...Array(7).fill(balanceMesNormal),
-                    balanceAgostoVacio,
-                    ...Array(4).fill(balanceMesNormal)
-                ];
+                for(let i = 0; i < 12; i++) {
+                    if (i === 7) { // Agosto
+                        datosMensuales.push(-gastosMes[i]); // Factura 0, asume el coste ordinario
+                    } else {
+                        datosMensuales.push(facturacionMesActivo - gastosMes[i]);
+                    }
+                }
             }
 
             if (chartFlujo) chartFlujo.destroy();
