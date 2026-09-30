@@ -1074,7 +1074,7 @@
                         <div><label>Descansos/Fines semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
                         <div><label>Festivos anuales</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
                         <div><label>Vacaciones (días continuos)</label><input type="number" id="vacaciones" value="30" oninput="calcular('base')"></div>
-                        <div><label>Previsión Bajas (días continuos)</label><input type="number" id="bajas" value="30" oninput="calcular('base')" style="border-color: #ef4444; font-weight: bold; background: #fff5f5;"></div>
+                        <div><label>Previsión Bajas (días continuos)</label><input type="number" id="bajas" value="0" oninput="calcular('base')" style="border-color: #ef4444; font-weight: bold; background: #fff5f5;"></div>
                     </div>
 
                     <!-- Sustitución Vacaciones -->
@@ -1129,7 +1129,7 @@
                                     </select>
                                 </div>
                                 <div style="width: 35%;">
-                                    <label style="margin-top: 0; font-size: 0.8em;">Mes de la Baja:</label>
+                                    <label style="margin-top: 0; font-size: 0.8em;">Mes de Comienzo de la Baja:</label>
                                     <select id="mesBajas" onchange="cambiarMesBaja(this.value)">
                                         <option value="0" selected>Enero (Arranque)</option>
                                         <option value="1">Febrero</option>
@@ -1282,7 +1282,7 @@
             <div class="tarjetas-grid">
                 <!-- Tarjeta 1: Mes con Baja por IT -->
                 <div class="card-desglose mes1">
-                    <span class="card-badge badge-mes1">⚠️ Mes con Baja por IT (<span id="card1-nombre-mes">Enero</span>)</span>
+                    <span class="card-badge badge-mes1">⚠️ Mes Tipo con Baja por IT (<span id="card1-nombre-mes">Enero</span>)</span>
                     <div class="card-title">Cobertura Sustitución por IT</div>
                     
                     <div class="card-metric"><span>Facturación Cliente (Canon):</span><strong id="card1-facturacion" style="color:#2563eb;">0,00 €</strong></div>
@@ -1300,6 +1300,8 @@
                         <span>Saldo de Caja del Mes:</span>
                         <span id="card1-balance">0,00 €</span>
                     </div>
+
+                    <div id="card1-aviso-plurimes" style="display:none; font-size: 0.78em; color: #991b1b; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 6px; padding: 6px 8px; margin-top: 8px; line-height: 1.4;"></div>
 
                     <div class="alerta-liquidez" id="card1-alerta">
                         <strong id="card1-alerta-titulo">🛡️ Fondo de Maniobra Necesario:</strong>
@@ -1376,7 +1378,7 @@
                     </div>
                     <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <label style="margin: 0; font-size: 0.85em; font-weight: 600; color: #991b1b;">⚠️ Mes de Baja por IT:</label>
+                            <label style="margin: 0; font-size: 0.85em; font-weight: 600; color: #991b1b;">⚠️ Mes de Comienzo de la Baja:</label>
                             <select id="selMesBajaInferior" onchange="cambiarMesBaja(this.value)" style="margin: 0; padding: 5px 8px; font-size: 0.85em; font-weight: 600; border: 1.5px solid #f87171; border-radius: 6px; background: #fff5f5; color: #991b1b; cursor: pointer;">
                                 <option value="0" selected>Enero (Mes 1)</option>
                                 <option value="1">Febrero (Mes 2)</option>
@@ -1820,13 +1822,14 @@
             calcular('base');
         }
 
-        function renderTiraMeses(gastosMes, balances, mesBajaIndex, mesVacIndex, bajas, vacaciones, pagas, sustBaja, sustVac) {
+        function renderTiraMeses(gastosMes, balances, diasBajaPorMes, mesVacIndex, vacaciones, pagas, sustBaja, sustVac) {
             const cont = document.getElementById('tiraMesesInteractiva');
             if (!cont) return;
             const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
             let html = '';
             for (let i = 0; i < 12; i++) {
-                const isBaja = (i === mesBajaIndex && bajas > 0);
+                const dIT = diasBajaPorMes[i] || 0;
+                const isBaja = (dIT > 0);
                 const isVac = (i === mesVacIndex && sustVac && vacaciones > 0);
                 const isExtra = (pagas === 14 && (i === 5 || i === 11));
                 const bal = balances[i];
@@ -1841,7 +1844,7 @@
                 <div class="mes-tile" style="border: 1.5px solid ${borderCol}; background: ${bgCol}; border-radius: 8px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; font-size: 0.8em; position: relative;">
                     <div style="font-weight: 800; color: #0f172a; margin-bottom: 3px; font-size: 0.9em; letter-spacing: 0.02em;">${meses[i]}</div>
                     <div style="min-height: 28px; display: flex; flex-direction: column; gap: 2px; align-items: center; justify-content: center;">
-                        ${isBaja ? '<span style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 10px; font-size: 0.72em; font-weight: 700; white-space: nowrap; border: 1px solid #fca5a5;">⚠️ IT</span>' : ''}
+                        ${isBaja ? `<span style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 10px; font-size: 0.72em; font-weight: 700; white-space: nowrap; border: 1px solid #fca5a5;">⚠️ IT (${dIT}d)</span>` : ''}
                         ${isVac ? '<span style="background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 10px; font-size: 0.72em; font-weight: 700; white-space: nowrap; border: 1px solid #93c5fd;">🏖️ Vac</span>' : ''}
                         ${isExtra ? '<span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 10px; font-size: 0.72em; font-weight: 700; white-space: nowrap; border: 1px solid #fde68a;">💰 Ext</span>' : ''}
                         ${(!isBaja && !isVac && !isExtra) ? '<span style="color: #94a3b8; font-size: 0.72em; font-weight: 500;">—</span>' : ''}
@@ -1850,7 +1853,7 @@
                         ${bal >= 0 ? '+' : ''}${Math.round(bal).toLocaleString('es-ES')}&nbsp;€
                     </div>
                     <div style="display: flex; justify-content: center; gap: 3px; margin-top: 6px; border-top: 1px dashed ${borderCol}; padding-top: 4px;">
-                        <button type="button" onclick="cambiarMesBaja(${i})" title="Asignar Baja por IT a ${meses[i]}" style="border: 1px solid #fca5a5; background: #fee2e2; color: #991b1b; font-size: 0.74em; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.15s;">⚠️</button>
+                        <button type="button" onclick="cambiarMesBaja(${i})" title="Fijar mes de inicio de Baja por IT en ${meses[i]}" style="border: 1px solid #fca5a5; background: #fee2e2; color: #991b1b; font-size: 0.74em; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.15s;">⚠️</button>
                         <button type="button" onclick="cambiarMesVacaciones(${i})" title="Asignar Vacaciones a ${meses[i]}" style="border: 1px solid #bfdbfe; background: #dbeafe; color: #1e40af; font-size: 0.74em; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.15s;">🏖️</button>
                     </div>
                 </div>`;
@@ -2117,38 +2120,38 @@
             const balanceOrdinario = cuotaMensualCliente - totalGastoOrdinario;
             const margenOrdinario = cuotaMensualCliente > 0 ? ((balanceOrdinario / cuotaMensualCliente) * 100) : 0;
 
-            // 6.2 Mes con Baja por IT (en mesBajaIndex):
-            const diasBajaMes = Math.min(30, bajas);
-            let salarioTitularBaja = (monetarioAnual / 12);
-            if (diasBajaMes > 0) {
+            // 6.2 Mes Tipo con Baja por IT (Tarjeta 1 de Radiografía: estricta visión mensual, máx. 30 días):
+            const diasBajaCard1 = (bajas > 0) ? Math.min(30, bajas) : 0;
+            let salarioTitularBajaCard1 = salarioBaseMensual;
+            if (diasBajaCard1 > 0) {
                 if (regimenIT === 'convenio100') {
                     // Convenio 100%: nómina íntegra abonada por la empresa
-                    salarioTitularBaja = (monetarioAnual / 12);
+                    salarioTitularBajaCard1 = salarioBaseMensual;
                 } else if (regimenIT === 'generalSS') {
                     // Régimen General: Días 1-3 (0%), 4-15 (60% empresa), 16+ (INSS)
-                    const d1a3 = Math.min(diasBajaMes, 3);
-                    const d4a15 = Math.max(0, Math.min(diasBajaMes - 3, 12));
-                    const d16mas = Math.max(0, diasBajaMes - 15);
-                    const ahorroBaja = (d1a3 * salarioDiarioMes) + (d4a15 * salarioDiarioMes * 0.40) + (d16mas * salarioDiarioMes);
-                    salarioTitularBaja = Math.max(0, (monetarioAnual / 12) - ahorroBaja);
+                    const d1a3 = Math.min(diasBajaCard1, 3);
+                    const d4a15 = Math.max(0, Math.min(diasBajaCard1 - 3, 12));
+                    const d16mas = Math.max(0, diasBajaCard1 - 15);
+                    const ahorroBajaCard1 = (d1a3 * salarioDiarioMes) + (d4a15 * salarioDiarioMes * 0.40) + (d16mas * salarioDiarioMes);
+                    salarioTitularBajaCard1 = Math.max(0, salarioBaseMensual - ahorroBajaCard1);
                 } else if (regimenIT === 'soloSS') {
                     // Solo SS: 0% salario titular a cargo de la empresa
-                    salarioTitularBaja = Math.max(0, (monetarioAnual / 12) - (diasBajaMes * salarioDiarioMes));
+                    salarioTitularBajaCard1 = Math.max(0, salarioBaseMensual - (diasBajaCard1 * salarioDiarioMes));
                 }
             }
             // SS patronal del titular: 100% obligatoria por ley (Art. 144.4 TRLGSS)
-            const costeTitularBaja = salarioTitularBaja + ssMensualTitular;
+            const costeTitularBajaCard1 = salarioTitularBajaCard1 + ssMensualTitular;
 
-            // Coste del sustituto durante la baja (el sustituto siempre cobra su salario íntegro por los días trabajados):
-            let sueldoSustitutoBajasMes = 0;
-            let ssSustitutoBajasMes = 0;
-            if (sustitucionBajasActiva && diasBajaMes > 0) {
-                sueldoSustitutoBajasMes = salarioDiarioMes * diasBajaMes;
-                ssSustitutoBajasMes = sueldoSustitutoBajasMes * (pctSSBajas / 100);
+            // Coste del sustituto durante el mes tipo de baja (el sustituto siempre cobra su salario íntegro por los días trabajados):
+            let sueldoSustitutoBajasCard1 = 0;
+            let ssSustitutoBajasCard1 = 0;
+            if (sustitucionBajasActiva && diasBajaCard1 > 0) {
+                sueldoSustitutoBajasCard1 = salarioDiarioMes * diasBajaCard1;
+                ssSustitutoBajasCard1 = sueldoSustitutoBajasCard1 * (pctSSBajas / 100);
             }
-            const costeSustitutoBajasMes = sueldoSustitutoBajasMes + ssSustitutoBajasMes;
-            const totalGastoBaja = costeTitularBaja + costeSustitutoBajasMes + indirectosMensual;
-            const balanceBaja = cuotaMensualCliente - totalGastoBaja;
+            const costeSustitutoBajasCard1 = sueldoSustitutoBajasCard1 + ssSustitutoBajasCard1;
+            const totalGastoBajaCard1 = costeTitularBajaCard1 + costeSustitutoBajasCard1 + indirectosMensual;
+            const balanceBajaCard1 = cuotaMensualCliente - totalGastoBajaCard1;
 
             // 6.3 Mes con Vacaciones (en mesVacIndex):
             const sueldoSustitutoVac = (sustitucionVacActiva && vacaciones > 0) ? (salarioDiarioMes * vacaciones) : 0;
@@ -2160,34 +2163,46 @@
             // =========================================================================
             // Volcar datos a las Tarjetas de Radiografía Pre-Contrato
             // =========================================================================
-            // Tarjeta 1 (Mes de Baja)
+            // Tarjeta 1 (Mes Tipo de Baja)
             const elCard1Nom = document.getElementById('card1-nombre-mes');
             if (elCard1Nom) elCard1Nom.innerText = nombreMesBaja;
             document.getElementById('card1-facturacion').innerText = cuotaMensualCliente.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('card1-bruto-sustituto').innerText = sueldoSustitutoBajasMes.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('card1-ss-sustituto').innerText = ssSustitutoBajasMes.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €" + (perfilSustitutoBajas === 'cee' ? " (Bonif. 100%)" : "");
-            document.getElementById('card1-bruto-titular').innerText = salarioTitularBaja.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-bruto-sustituto').innerText = sueldoSustitutoBajasCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-ss-sustituto').innerText = ssSustitutoBajasCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €" + (perfilSustitutoBajas === 'cee' ? " (Bonif. 100%)" : "");
+            document.getElementById('card1-bruto-titular').innerText = salarioTitularBajaCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             document.getElementById('card1-ss-titular').innerText = ssMensualTitular.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('card1-dias-baja').innerText = diasBajaMes;
+            document.getElementById('card1-dias-baja').innerText = diasBajaCard1;
             document.getElementById('card1-indirectos').innerText = indirectosMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('card1-total-gasto').innerText = totalGastoBaja.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-total-gasto').innerText = totalGastoBajaCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             
             const elBal1 = document.getElementById('card1-balance');
-            elBal1.innerText = (balanceBaja >= 0 ? "+" : "") + balanceBaja.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            elBal1.style.color = balanceBaja >= 0 ? "#166534" : "#991b1b";
+            elBal1.innerText = (balanceBajaCard1 >= 0 ? "+" : "") + balanceBajaCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            elBal1.style.color = balanceBajaCard1 >= 0 ? "#166534" : "#991b1b";
+
+            // Aviso si la previsión total supera los 30 días (plurimensual):
+            const elAvisoPluri = document.getElementById('card1-aviso-plurimes');
+            if (elAvisoPluri) {
+                if (bajas > 30) {
+                    elAvisoPluri.style.display = 'block';
+                    const mesesAfectados = Math.ceil(bajas / 30);
+                    elAvisoPluri.innerHTML = `<strong>ℹ️ Previsión plurimensual de ${bajas} días:</strong> Esta tarjeta muestra la foto de <strong>1 mes tipo</strong> (${diasBajaCard1}d). En el planificador inferior los ${bajas} días se reflejan en ${mesesAfectados} meses consecutivos a partir de <strong>${nombreMesBaja}</strong>.`;
+                } else {
+                    elAvisoPluri.style.display = 'none';
+                }
+            }
 
             const elFondo = document.getElementById('card1-fondo-maniobra');
-            if (elFondo) elFondo.innerText = totalGastoBaja.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            if (elFondo) elFondo.innerText = totalGastoBajaCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
 
             const elAlertaTit = document.getElementById('card1-alerta-titulo');
             const elAlertaTxt = document.getElementById('card1-alerta-texto');
             if (elAlertaTit && elAlertaTxt) {
                 if (mesBajaIndex === 0) {
                     elAlertaTit.innerText = "🛡️ Fondo de Maniobra (Arranque):";
-                    elAlertaTxt.innerHTML = `Para arrancar este contrato en ${nombreMesBaja} sin tensiones de tesorería, debes disponer de al menos <b>${totalGastoBaja.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</b> antes de cobrar la 1ª factura del cliente.`;
+                    elAlertaTxt.innerHTML = `Para arrancar este contrato en ${nombreMesBaja} sin tensiones de tesorería, debes disponer de al menos <b>${totalGastoBajaCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</b> antes de cobrar la 1ª factura del cliente.`;
                 } else {
                     elAlertaTit.innerText = `📉 Tensión de Tesorería en ${nombreMesBaja}:`;
-                    elAlertaTxt.innerHTML = `En ${nombreMesBaja} el desembolso operativo asciende a <b>${totalGastoBaja.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</b> debido al salario del sustituto presencial y la cotización obligatoria a la SS.`;
+                    elAlertaTxt.innerHTML = `En ${nombreMesBaja} el desembolso operativo asciende a <b>${totalGastoBajaCard1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</b> debido al salario del sustituto presencial y la cotización obligatoria a la SS.`;
                 }
             }
 
@@ -2216,41 +2231,68 @@
             elBal3.style.color = balanceVac >= 0 ? "#166534" : "#991b1b";
 
             // =========================================================================
-            // 7. GRÁFICO: 12 MESES CON TESORERÍA ACUMULADA
+            // 7. GRÁFICO Y PLANIFICADOR: 12 MESES CON TESORERÍA ACUMULADA
             // =========================================================================
-            let gastosMes = Array(12).fill(totalGastoOrdinario);
-            
-            // Asignar el mes de baja:
+            // 1. Distribuir los días de baja entre los meses consecutivos a partir de mesBajaIndex:
+            const diasBajaPorMes = Array(12).fill(0);
             if (bajas > 0) {
-                if (mesBajaIndex === mesVacIndex && sustitucionVacActiva && vacaciones > 0) {
-                    // Coincidencia de baja y vacaciones en el mismo mes:
-                    gastosMes[mesBajaIndex] = costeTitularBaja + costeSustitutoBajasMes + costeSustitutoVacMes + indirectosMensual;
-                } else {
-                    gastosMes[mesBajaIndex] = totalGastoBaja;
+                let diasRestantes = bajas;
+                for (let step = 0; step < 12 && diasRestantes > 0; step++) {
+                    const m = (mesBajaIndex + step) % 12;
+                    const d = Math.min(30, diasRestantes);
+                    diasBajaPorMes[m] = d;
+                    diasRestantes -= d;
                 }
             }
 
-            // Si hay más de 30 días de baja, los días restantes se computan en el mes siguiente:
-            if (bajas > 30) {
-                const mesSiguiente = (mesBajaIndex + 1) % 12;
-                const diasBajaRestantes = bajas - 30;
-                let reduccionSalarioMes2 = 0;
-                if (regimenIT === 'soloSS' || regimenIT === 'generalSS') {
-                    reduccionSalarioMes2 = Math.min(monetarioAnual / 12, diasBajaRestantes * salarioDiarioMes);
+            // 2. Calcular los gastos de cada mes (0 a 11):
+            let gastosMes = Array(12).fill(0);
+            for (let i = 0; i < 12; i++) {
+                let gastoEsteMes = totalGastoOrdinario;
+
+                // Pagas extras si son 14 pagas:
+                if (pagas === 14 && (i === 5 || i === 11)) {
+                    gastoEsteMes += salarioBaseMensual; // Junio o Diciembre
                 }
-                const extraSustitutoMes2 = sustitucionBajasActiva ? ((salarioDiarioMes * diasBajaRestantes) * (1 + pctSSBajas / 100)) : 0;
-                gastosMes[mesSiguiente] = gastosMes[mesSiguiente] - reduccionSalarioMes2 + extraSustitutoMes2;
-            }
 
-            // Asignar el mes de vacaciones (si no coincide con el de baja):
-            if (sustitucionVacActiva && vacaciones > 0 && mesBajaIndex !== mesVacIndex) {
-                gastosMes[mesVacIndex] = totalGastoVac;
-            }
+                // Vacaciones (si este mes coincide con el de vacaciones):
+                if (sustitucionVacActiva && vacaciones > 0 && i === mesVacIndex) {
+                    gastoEsteMes += costeSustitutoVacMes;
+                }
 
-            // Pagas extras si son 14 pagas:
-            if (pagas === 14) {
-                gastosMes[5] += salarioBaseMensual; // Junio
-                gastosMes[11] += salarioBaseMensual; // Diciembre
+                // Bajas por IT en este mes:
+                const dMes = diasBajaPorMes[i];
+                if (dMes > 0) {
+                    // Días acumulados de baja antes de este mes en el episodio de IT:
+                    const stepMes = (i >= mesBajaIndex) ? (i - mesBajaIndex) : (12 - mesBajaIndex + i);
+                    const diasPrevios = stepMes * 30;
+                    const diaInicio = diasPrevios + 1;
+                    const diaFin = diasPrevios + dMes;
+
+                    let ahorroTitularMes = 0;
+                    if (regimenIT === 'convenio100') {
+                        ahorroTitularMes = 0;
+                    } else if (regimenIT === 'soloSS') {
+                        ahorroTitularMes = dMes * salarioDiarioMes;
+                    } else if (regimenIT === 'generalSS') {
+                        const overlap1a3 = Math.max(0, Math.min(diaFin, 3) - Math.max(diaInicio, 1) + 1);
+                        const overlap4a15 = Math.max(0, Math.min(diaFin, 15) - Math.max(diaInicio, 4) + 1);
+                        const overlap16mas = Math.max(0, diaFin - Math.max(diaInicio, 16) + 1);
+                        ahorroTitularMes = (overlap1a3 * salarioDiarioMes) + (overlap4a15 * salarioDiarioMes * 0.40) + (overlap16mas * salarioDiarioMes);
+                    }
+
+                    // Reducción salarial del titular:
+                    gastoEsteMes -= ahorroTitularMes;
+
+                    // Desembolso por sustituto presencial en este mes:
+                    if (sustitucionBajasActiva) {
+                        const sueldoSustMes = salarioDiarioMes * dMes;
+                        const ssSustMes = sueldoSustMes * (pctSSBajas / 100);
+                        gastoEsteMes += (sueldoSustMes + ssSustMes);
+                    }
+                }
+
+                gastosMes[i] = gastoEsteMes;
             }
 
             let balancesMensuales = [];
@@ -2264,14 +2306,14 @@
                 tesoreriaAcumulada.push(acumulado);
             }
 
-            // Renderizar la tira interactiva de 12 meses
-            renderTiraMeses(gastosMes, balancesMensuales, mesBajaIndex, mesVacIndex, bajas, vacaciones, pagas, sustitucionBajasActiva, sustitucionVacActiva);
+            // Renderizar la tira interactiva de 12 meses con los días exactos de baja por mes:
+            renderTiraMeses(gastosMes, balancesMensuales, diasBajaPorMes, mesVacIndex, vacaciones, pagas, sustitucionBajasActiva, sustitucionVacActiva);
 
             // Etiquetas dinámicas para el gráfico:
             const etiquetasMeses = mesesNombres.map((mes, i) => {
                 const abr = mes.substring(0, 3);
                 let badges = [];
-                if (i === mesBajaIndex && bajas > 0) badges.push('Baja');
+                if (diasBajaPorMes[i] > 0) badges.push(`IT ${diasBajaPorMes[i]}d`);
                 if (i === mesVacIndex && sustitucionVacActiva && vacaciones > 0) badges.push('Vac');
                 if (pagas === 14 && (i === 5 || i === 11)) badges.push('Extra');
                 return badges.length > 0 ? `${abr} (${badges.join('+')})` : abr;
