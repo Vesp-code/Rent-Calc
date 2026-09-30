@@ -55,60 +55,220 @@
         .comp-table th:first-child, .comp-table td:first-child { text-align: left; font-weight: bold; color: #475569;}
         .comp-diff { font-weight: bold; padding: 10px; margin-top: 15px; border-radius: 5px; text-align: center; font-size: 0.95em; }
 
-        /* --- ESTILOS DEL MODAL PREVIEW (Vista Previa Presupuesto) --- */
+        /* --- ESTILOS RADIOGRAFÍA PRE-CONTRATO (Mes 1 vs Ordinario) --- */
+        .tarjetas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card-desglose { background: #fff; border-radius: 8px; border: 1px solid #cbd5e1; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: relative; }
+        .card-desglose.mes1 { border-top: 4px solid #ef4444; }
+        .card-desglose.ordinario { border-top: 4px solid #10b981; }
+        .card-desglose.vacaciones { border-top: 4px solid #f59e0b; }
+        .card-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .badge-mes1 { background: #fee2e2; color: #991b1b; }
+        .badge-ordinario { background: #dcfce7; color: #166534; }
+        .badge-vacaciones { background: #fef3c7; color: #92400e; }
+        .card-title { font-size: 1.1em; font-weight: bold; color: #1e293b; margin-bottom: 15px; }
+        .card-metric { display: flex; justify-content: space-between; font-size: 0.9em; padding: 5px 0; border-bottom: 1px dashed #f1f5f9; }
+        .card-metric.total { border-top: 2px solid #e2e8f0; border-bottom: none; font-weight: bold; margin-top: 10px; padding-top: 10px; font-size: 1em; }
+        .alerta-liquidez { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; padding: 12px; margin-top: 15px; font-size: 0.85em; color: #9f1239; line-height: 1.4; }
+        .alerta-liquidez strong { display: block; margin-bottom: 3px; font-size: 0.95em; }
+
+        /* --- ESTILOS DEL MODAL PREVIEW (Factura / Propuesta Moderna) --- */
         .modal-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.85); z-index: 2000; overflow-y: auto; padding: 40px 0; 
+            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 2000; overflow-y: auto; padding: 30px 15px; 
         }
-        .modal-content { 
-            background: white; max-width: 850px; margin: 0 auto; padding: 50px; 
-            border-radius: 4px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            position: relative;
+        .modal-container {
+            max-width: 920px; margin: 0 auto;
         }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
-        
-        /* Estilos para textos editables */
-        .editable { border-bottom: 1px dashed #94a3b8; transition: 0.2s; min-width: 50px; display: inline-block; }
-        .editable:hover, .editable:focus { background-color: #f1f5f9; outline: none; border-bottom: 1px solid #3498db; }
+        .modal-toolbar {
+            background: #0f172a; color: white; padding: 12px 20px; border-radius: 8px 8px 0 0;
+            display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .toolbar-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; color: #94a3b8;
+        }
+        .toolbar-badge span {
+            width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;
+        }
+        .toolbar-iva-group {
+            display: flex; align-items: center; gap: 6px; font-size: 0.85em; color: #cbd5e1;
+        }
+        .btn-iva {
+            padding: 4px 8px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1;
+            border-radius: 4px; cursor: pointer; font-size: 0.85em; transition: 0.2s;
+        }
+        .btn-iva.active {
+            background: #2563eb; color: white; border-color: #3b82f6; font-weight: bold;
+        }
+        .toolbar-actions {
+            display: flex; gap: 10px; align-items: center;
+        }
+        .btn-print {
+            background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px;
+            font-weight: bold; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .btn-print:hover { background: #059669; }
+        .btn-close-modal {
+            background: #475569; color: white; border: none; padding: 8px 14px; border-radius: 6px;
+            font-weight: 600; font-size: 0.9em; cursor: pointer; transition: 0.2s;
+        }
+        .btn-close-modal:hover { background: #334155; }
+
+        /* Hoja de papel de la Factura */
+        .factura-papel {
+            background: white; padding: 50px; border-radius: 0 0 8px 8px;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.3); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #1e293b; line-height: 1.5;
+        }
+
+        /* Textos editables */
+        .editable {
+            border-bottom: 1px dashed #cbd5e1; transition: all 0.2s; display: inline-block; min-width: 25px;
+        }
+        .editable:hover, .editable:focus {
+            background-color: #f8fafc; border-bottom: 1.5px solid #2563eb; outline: none; border-radius: 2px;
+        }
         [contenteditable="true"]:empty:before { content: attr(placeholder); color: #94a3b8; font-style: italic; }
 
-        /* Diseño del Presupuesto */
-        .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-        .pdf-title { margin: 0; font-size: 28px; color: #1e293b; text-transform: uppercase; letter-spacing: 1px;}
-        .pdf-section { margin-bottom: 30px; }
-        .pdf-section h3 { color: #3498db; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px; }
-        
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .pdf-table th, .pdf-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .pdf-table th { background-color: #f8fafc; color: #475569; font-weight: 600; }
-        .pdf-table td { color: #1e293b; }
-        .pdf-table td.monto { text-align: right; font-weight: bold; }
-        
-        .pdf-total-box { display: flex; justify-content: flex-end; margin-top: 20px; }
-        .pdf-total-content { background: #f1f5f9; padding: 20px; border-radius: 8px; border: 1px solid #cbd5e1; width: 350px; }
-        .pdf-total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
-        .pdf-total-final { display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: #0f172a; margin-top: 15px; padding-top: 15px; border-top: 2px solid #cbd5e1; }
-        
-        .pdf-footer { margin-top: 60px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        /* Cabecera Corporativa */
+        .factura-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            border-bottom: 2px solid #e2e8f0; padding-bottom: 30px; margin-bottom: 25px;
+        }
+        .factura-logo-block {
+            display: flex; gap: 15px; align-items: center; margin-bottom: 15px;
+        }
+        .factura-logo-icon {
+            width: 48px; height: 48px; background: #0f172a; color: white; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;
+        }
+        .factura-empresa-nombre {
+            font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;
+        }
+        .factura-datos-emisor {
+            font-size: 13px; color: #64748b; line-height: 1.5;
+        }
 
-        /* --- REGLAS DE IMPRESIÓN (PDF) --- */
+        .factura-meta-box {
+            text-align: right; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 15px 20px; min-width: 280px;
+        }
+        .factura-tipo-doc {
+            font-size: 18px; font-weight: 800; color: #1e40af; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 10px;
+        }
+        .factura-meta-row {
+            display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; color: #475569;
+        }
+        .factura-meta-row strong { color: #0f172a; }
+
+        /* Partes: Cliente vs Condiciones */
+        .factura-partes-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;
+        }
+        .factura-card-info {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px;
+        }
+        .factura-card-title {
+            font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;
+            letter-spacing: 0.8px; margin-bottom: 10px; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;
+        }
+        .factura-card-content { font-size: 13px; color: #334155; line-height: 1.6; }
+
+        /* Descripción / Alcance */
+        .factura-bloque { margin-bottom: 30px; }
+        .factura-bloque-titulo {
+            font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+        }
+        .factura-bloque-titulo::before {
+            content: ""; display: inline-block; width: 4px; height: 16px; background: #2563eb; border-radius: 2px;
+        }
+        .factura-desc-texto {
+            font-size: 13.5px; color: #475569; line-height: 1.6; background: #fff; padding: 12px;
+            border-radius: 6px; border: 1px solid #e2e8f0;
+        }
+
+        /* Tabla Económica */
+        .factura-tabla {
+            width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e8f0;
+            border-radius: 8px; overflow: hidden; margin-bottom: 25px;
+        }
+        .factura-tabla thead th {
+            background: #0f172a; color: white; font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; text-align: left;
+        }
+        .factura-tabla tbody td {
+            padding: 14px 16px; font-size: 13.5px; border-bottom: 1px solid #f1f5f9; color: #1e293b;
+        }
+        .factura-tabla tbody tr:last-child td { border-bottom: none; }
+        .factura-tabla tbody tr:nth-child(even) { background-color: #fafbfd; }
+        .factura-tabla td.monto { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .factura-tag-cobertura {
+            display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 4px;
+            background: #dcfce7; color: #166534; font-weight: 600; margin-top: 4px;
+        }
+
+        /* Bloque Inferior: Pago y Totales */
+        .factura-inferior-grid {
+            display: grid; grid-template-columns: 1fr 340px; gap: 30px; margin-bottom: 35px; align-items: flex-start;
+        }
+        .factura-condiciones-box {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px;
+            font-size: 12.5px; color: #475569; line-height: 1.6;
+        }
+        .factura-condiciones-title {
+            font-size: 12px; font-weight: bold; color: #0f172a; text-transform: uppercase;
+            margin-bottom: 8px; display: block;
+        }
+        
+        .factura-totales-card {
+            background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px;
+        }
+        .totales-row {
+            display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 8px; color: #475569;
+        }
+        .totales-row.anual {
+            font-size: 13px; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 8px;
+        }
+        .totales-destacado {
+            display: flex; justify-content: space-between; align-items: baseline;
+            background: #0f172a; color: white; padding: 12px 15px; border-radius: 6px;
+            margin: 12px 0 10px 0;
+        }
+        .totales-destacado span { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .totales-destacado strong { font-size: 20px; font-weight: 800; color: #38bdf8; }
+
+        /* Firmas */
+        .factura-firmas-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;
+        }
+        .firma-box {
+            border: 1px dashed #cbd5e1; border-radius: 6px; padding: 15px; height: 90px;
+            display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; color: #64748b;
+        }
+        .firma-label { font-weight: 700; color: #334155; }
+        .firma-linea { border-bottom: 1px solid #cbd5e1; margin-top: auto; padding-top: 10px; font-size: 11px; }
+
+        /* Footer */
+        .factura-footer-legal {
+            margin-top: 30px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 15px; line-height: 1.5;
+        }
+
+        /* REGLAS DE IMPRESIÓN (PDF) */
         @media print {
-            body { background: white; padding: 0; margin: 0; }
-            /* Ocultar la calculadora y otros elementos interactivos */
-            .interfaz-calculadora, #widgetComparador, .modal-actions { display: none !important; }
-            
-            /* El modal pasa a ser la página completa */
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .interfaz-calculadora, #widgetComparador, .modal-toolbar { display: none !important; }
             .modal-overlay { 
-                display: block !important; position: static; background: white; 
-                padding: 0; overflow: visible; height: auto;
+                display: block !important; position: static !important; background: white !important; 
+                padding: 0 !important; overflow: visible !important; height: auto !important;
             }
-            .modal-content { box-shadow: none; max-width: 100%; padding: 0; margin: 0; border: none; }
-            
-            /* Quitar el borde de puntos a los textos editables para que parezcan texto normal en el PDF */
+            .modal-container { max-width: 100% !important; margin: 0 !important; }
+            .factura-papel {
+                box-shadow: none !important; border: none !important; padding: 12mm 15mm !important; border-radius: 0 !important;
+            }
             .editable { border: none !important; background: transparent !important; }
-            
-            /* Forzar colores */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
@@ -132,14 +292,18 @@
                 <div class="panel">
                     <div class="titulo-panel">1. Estructura de Costes (Empresa)</div>
 
-                    <label>Formato y Salario Monetario Bruto <span class="info-icon">i<span class="tooltip-text">Salario bruto antes de impuestos que cobrará el trabajador.</span></span></label>
+                    <label>Formato, Salario Bruto y Pagas <span class="info-icon">i<span class="tooltip-text">Salario bruto antes de impuestos que cobrará el trabajador según convenio.</span></span></label>
                     <div class="flex-row">
-                        <select id="tipoSalario" onchange="calcular('base')" style="width: 40%; margin-top: 0;">
-                            <option value="anual">Anual</option>
-                            <option value="mensual">Mensual</option>
+                        <select id="tipoSalario" onchange="calcular('base')" style="width: 38%; margin-top: 0;">
+                            <option value="anual">Bruto Anual</option>
+                            <option value="mensual">Bruto Mensual</option>
                             <option value="hora" selected>Precio/Hora</option>
                         </select>
-                        <input type="number" id="valorSalario" value="10" oninput="calcular('base')" style="width: 60%; margin-top: 0;">
+                        <input type="number" id="valorSalario" value="10" oninput="calcular('base')" style="width: 32%; margin-top: 0;">
+                        <select id="pagas" onchange="calcular('base')" style="width: 30%; margin-top: 0;">
+                            <option value="12">12 pagas</option>
+                            <option value="14">14 pagas</option>
+                        </select>
                     </div>
 
                     <label>Costes Indirectos Fijos (€/mes) <span class="info-icon">i<span class="tooltip-text">Gastos de estructura asociados al puesto: Gestoría, EPIs, licencias de software, renting, etc. Se suma al coste operativo.</span></span></label>
@@ -167,25 +331,63 @@
                         </div>
                     </details>
 
-                    <label>Calendario Anual (365 días) <span class="info-icon">i<span class="tooltip-text">Días teóricos que el empleado NO trabaja. Ayuda a calcular los días reales facturables.</span></span></label>
+                    <label>Calendario Anual (365 días continuos) <span class="info-icon">i<span class="tooltip-text">Días de calendario. Para contratas de lunes a viernes mantén 104 días de descanso; si el servicio opera de lunes a domingo (365 días continuos), pon 0 en fines de semana. Las bajas y vacaciones se computan en días naturales continuos incluyendo fines de semana.</span></span></label>
                     <div class="cal-grid">
-                        <div><label>Fines de semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
-                        <div><label>Festivos</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
-                        <div><label>Vacaciones (hábiles)</label><input type="number" id="vacaciones" value="30" oninput="calcular('base')"></div>
-                        <div><label>Previsión Bajas (días)</label><input type="number" id="bajas" value="0" oninput="calcular('base')" style="border-color: #f87171;"></div>
+                        <div><label>Descansos/Fines semana</label><input type="number" id="finesSemana" value="104" oninput="calcular('base')"></div>
+                        <div><label>Festivos anuales</label><input type="number" id="festivos" value="14" oninput="calcular('base')"></div>
+                        <div><label>Vacaciones (días continuos)</label><input type="number" id="vacaciones" value="30" oninput="calcular('base')"></div>
+                        <div><label>Previsión Bajas (días continuos)</label><input type="number" id="bajas" value="30" oninput="calcular('base')" style="border-color: #ef4444; font-weight: bold; background: #fff5f5;"></div>
                     </div>
 
+                    <!-- Sustitución Vacaciones -->
                     <div class="box-sustitucion">
                         <label class="toggle-label">
-                            <input type="checkbox" id="activarSustitucion" onchange="toggleSustitucion()" checked>
-                            <strong>Sustituir Vacaciones <span class="info-icon" style="background:#1e3a8a;">i<span class="tooltip-text">Calcula el impacto de contratar un sustituto durante el mes de vacaciones (asumido en Agosto). Recuperas la facturación pero pagas dos sueldos.</span></span></strong>
+                            <input type="checkbox" id="activarSustitucionVac" onchange="toggleSustitucion()" checked>
+                            <strong>Sustituir Vacaciones (Cobertura Continua) <span class="info-icon" style="background:#1e3a8a;">i<span class="tooltip-text">Garantiza el servicio contratado en vacaciones contratando un sustituto (por defecto en Agosto). Se factura el mes completo al cliente.</span></span></strong>
                         </label>
-                        <div id="opcionesSustitucion" style="display: block; margin-top: 10px;">
-                            <label style="margin-top: 0; font-size: 0.85em;">Perfil del Sustituto:</label>
-                            <select id="perfilSustituto" onchange="calcular('base')">
-                                <option value="cee">♿ Sustituto CEE (0% Seguridad Social)</option>
-                                <option value="normal" selected>🏢 Sustituto Estándar (SS Ordinaria)</option>
-                            </select>
+                        <div id="opcionesSustitucionVac" style="display: block; margin-top: 10px;">
+                            <div class="flex-row">
+                                <div style="flex: 1;">
+                                    <label style="margin-top: 0; font-size: 0.8em;">Perfil Sustituto Vacaciones:</label>
+                                    <select id="perfilSustitutoVac" onchange="calcular('base')">
+                                        <option value="cee">♿ Sustituto CEE (0% Seguridad Social)</option>
+                                        <option value="normal" selected>🏢 Sustituto Estándar (SS Ordinaria)</option>
+                                    </select>
+                                </div>
+                                <div style="width: 35%;">
+                                    <label style="margin-top: 0; font-size: 0.8em;">Mes Vacaciones:</label>
+                                    <select id="mesVacaciones" onchange="calcular('base')">
+                                        <option value="6">Julio</option>
+                                        <option value="7" selected>Agosto</option>
+                                        <option value="8">Septiembre</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sustitución Bajas IT -->
+                    <div class="box-sustitucion" style="border-color: #fca5a5; background: #fffaf0;">
+                        <label class="toggle-label" style="color: #991b1b;">
+                            <input type="checkbox" id="activarSustitucionBajas" onchange="toggleSustitucion()" checked>
+                            <strong>Sustituir Bajas por IT (Mes 1 Arranque) <span class="info-icon" style="background:#dc2626;">i<span class="tooltip-text">Si hay previsión de baja (ej. 30 días al inicio del contrato o subrogación), se asigna un sustituto continuo durante esos días. Las horas del contrato no se pierden y se calcula el doble coste inicial.</span></span></strong>
+                        </label>
+                        <div id="opcionesSustitucionBajas" style="display: block; margin-top: 10px;">
+                            <div style="margin-bottom: 8px;">
+                                <label style="margin-top: 0; font-size: 0.8em;">Perfil Sustituto Bajas:</label>
+                                <select id="perfilSustitutoBajas" onchange="calcular('base')" oninput="calcular('base')">
+                                    <option value="cee">♿ Sustituto CEE (0% Seguridad Social)</option>
+                                    <option value="normal" selected>🏢 Sustituto Estándar (SS Ordinaria)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="margin-top: 0; font-size: 0.8em;">Coste Salarial Titular durante la Baja:</label>
+                                <select id="regimenIT" onchange="calcular('base')" oninput="calcular('base')">
+                                    <option value="convenio100" selected>📋 Convenio: 100% Salario Complementado (+ SS patronal)</option>
+                                    <option value="generalSS">🏛️ Régimen General SS: Días 1-3 (0%), 4-15 (60% empresa), 16+ (INSS)</option>
+                                    <option value="soloSS">🛡️ Solo Seguridad Social (0% salario directo empresa)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -198,15 +400,32 @@
                     <div class="titulo-panel">2. Análisis Financiero y Nómina</div>
 
                     <div class="result-row"><span>Base Cotización Anual (Titular):</span><span class="result-value" id="resBaseCotizacion">0,00 €</span></div>
-                    <div class="result-row"><span>Coste SS Titular:</span><span class="result-value" id="resCosteSS">0,00 €</span></div>
+                    <div class="result-row"><span>Coste SS Titular (100% todo el año):</span><span class="result-value" id="resCosteSS">0,00 €</span></div>
                     
-                    <div id="rowCosteSustitucion" class="result-row" style="display: flex; color: #2563eb;">
-                        <span>Coste Sustitución (1 Mes):</span>
-                        <span class="result-value" id="resCosteSustitucion">0,00 €</span>
+                    <div id="rowCosteSustitucionVac" class="result-row" style="display: flex; color: #2563eb;">
+                        <span>Coste Sustitución Vacaciones:</span>
+                        <span class="result-value" id="resCosteSustitucionVac">0,00 €</span>
+                    </div>
+
+                    <div id="rowCosteSustitucionBajas" style="display: block; margin-top: 10px; background: #fff5f5; border: 1px solid #fecdd3; border-radius: 6px; padding: 10px;">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; color: #991b1b; font-size: 0.95em;">
+                            <span>Coste Neto Bajas por IT (<span id="resDiasBajasLabel">30</span> días): <span class="info-icon" style="background:#dc2626;">i<span class="tooltip-text">Impacto neto en el presupuesto anual = Coste del sustituto menos el ahorro salarial asumido por el INSS/Mutua según el régimen de IT seleccionado.</span></span></span>
+                            <span class="result-value" id="resCosteSustitucionBajas" style="color: #991b1b;">0,00 €</span>
+                        </div>
+                        <div style="font-size: 0.85em; color: #64748b; margin-top: 6px; border-top: 1px dashed #fca5a5; padding-top: 5px; line-height: 1.5;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>↳ Sustituto (<span id="resPerfilSustitutoBajasLabel">Estándar</span> sueldo + SS):</span>
+                                <span id="resSustitutoBajasBruto" style="font-weight: 600; color: #b91c1c;">+0,00 €</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;" id="rowAhorroIT">
+                                <span style="color: #166534;">↳ Ahorro Salarial Empresa (Pago Delegado INSS/Mutua):</span>
+                                <span id="resAhorroBajaIT" style="font-weight: 600; color: #166534;">-0,00 €</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="result-row" style="background: #f1f5f9; padding: 10px; margin: 15px -10px 0 -10px; border-radius: 5px 5px 0 0; border-bottom: none;">
-                        <span>Coste Total Operativo Anual: <span class="info-icon" style="background:#0f172a;">i<span class="tooltip-text">Suma del Salario + SS + Costes Indirectos anuales + Sustitución (si está activa).</span></span></span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
+                        <span>Coste Total Operativo Anual: <span class="info-icon" style="background:#0f172a;">i<span class="tooltip-text">Suma de Salario Pagado Titular + SS Titular + Indirectos + Sustituto Vacaciones + Coste Neto Bajas IT.</span></span></span><span class="result-value" id="resCosteTotal" style="color: #0f172a;">0,00 €</span>
                     </div>
                     <div class="result-row" style="background: #f8fafc; padding: 5px 10px 10px 10px; margin: 0 -10px 0 -10px; border-radius: 0 0 5px 5px; font-size: 0.95em; border-bottom: 1px dashed #cbd5e1;">
                         <span style="color: #64748b;">↳ Coste Medio Mensual (Empresa):</span>
@@ -232,27 +451,150 @@
                                 <span>Beneficio Neto Anual:</span>
                                 <span id="resBeneficio">0,00 €</span>
                             </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.85em; color: #1e40af; border-top: 1px dashed #bfdbfe; padding-top: 6px;">
+                                <span>Variación Canon Cliente por Régimen IT:</span>
+                                <span id="resImpactoITCliente" style="font-weight: 600;">Convenio 100%</span>
+                            </div>
                         </div>
                     </div>
 
-                    <details style="border-color: #10b981;" open>
-                        <summary style="color: #10b981;">Liquidez del Trabajador Titular (Nómina)</summary>
-                        <div class="cal-grid" style="border:none; padding:0;">
+                    <!-- Desglose Salarial Bruto para Licitaciones -->
+                    <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px;">
+                        <div style="font-weight: bold; color: #1e293b; font-size: 0.95em; border-bottom: 2px solid #3b82f6; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between;">
+                            <span>💼 Desglose de Retribuciones Brutas (Licitación)</span>
+                            <span style="font-size: 0.8em; color: #64748b; font-weight: normal;">*Costes salariales brutos</span>
+                        </div>
+                        <div class="result-row" style="margin-top: 5px; font-size: 0.95em;">
+                            <span>Salario Bruto Titular (Mes Ordinario):</span>
+                            <strong class="result-value" id="resBrutoMensual" style="color: #1e3a8a;">0,00 €/mes</strong>
+                        </div>
+                        <div class="result-row" style="margin-top: 5px; font-size: 0.95em;" id="rowPagaExtra">
+                            <span>Importe Bruto Pagas Extras (Jun/Dic):</span>
+                            <span class="result-value" id="resPagaExtra" style="color: #2563eb;">0,00 €</span>
+                        </div>
+                        <div class="result-row" style="margin-top: 5px; font-size: 0.95em;">
+                            <span>Salario Bruto Titular Anual (Convenio):</span>
+                            <strong class="result-value" id="resBrutoAnual" style="color: #0f172a;">0,00 €/año</strong>
+                        </div>
+                        <div class="result-row" style="margin-top: 5px; font-size: 0.95em; color: #1e40af;" id="rowBrutoEfectivoEmpresa">
+                            <span>↳ Salario Bruto Pagado por Empresa (tras IT):</span>
+                            <strong class="result-value" id="resBrutoEfectivoEmpresa">0,00 €/año</strong>
+                        </div>
+                        <div class="result-row" style="margin-top: 5px; font-size: 0.95em;">
+                            <span>Salario Bruto Diario (~365 días):</span>
+                            <span class="result-value" id="resBrutoDiario" style="color: #475569;">0,00 €/día</span>
+                        </div>
+                        <div class="result-row" style="margin-top: 5px; font-size: 0.95em; color: #1e40af; border-bottom: none;">
+                            <span>Cuota Patronal SS Titular:</span>
+                            <span class="result-value" id="resSSMensualTitular">0,00 €/mes</span>
+                        </div>
+                    </div>
+
+                    <!-- Detalle secundario opcional -->
+                    <details style="border-color: #cbd5e1; margin-top: 10px;">
+                        <summary style="color: #64748b; font-size: 0.85em; margin-bottom: 5px;">Estimación IRPF / Líquido (Secundario)</summary>
+                        <div class="cal-grid" style="border:none; padding: 5px 0;">
                             <div>
-                                <label>Retención IRPF (%)</label>
-                                <input type="number" id="irpf" step="0.1" oninput="calcular('base')">
+                                <label style="font-size: 0.8em;">Retención IRPF (%)</label>
+                                <input type="number" id="irpf" value="10.0" step="0.1" oninput="calcular('base')" style="font-size: 0.9em; padding: 5px;">
                             </div>
                             <div>
-                                <label>Número de pagas <span class="info-icon">i<span class="tooltip-text">Afecta al bolsillo del trabajador y al flujo de caja mensual de la empresa (doble sueldo en Junio/Diciembre si son 14 pagas).</span></span></label>
-                                <select id="pagas" onchange="calcular('base')"><option value="12">12 pagas</option><option value="14">14 pagas</option></select>
+                                <label style="font-size: 0.8em;">Líquido Orientativo:</label>
+                                <div id="resNeto" style="font-weight: bold; color: #065f46; margin-top: 8px; font-size: 0.95em;">0,00 €</div>
                             </div>
                         </div>
-                        <div class="neto-box">Neto a percibir (Bolsillo Trabajador): <span id="resNeto" style="float:right;">0,00 €</span></div>
                     </details>
                 </div>
             </div>
 
-            <div class="titulo-panel">3. Flujo de Caja Mensual Estimado</div>
+            <!-- 3. RADIOGRAFÍA PRE-CONTRATO (Mes 1 vs Ordinario) -->
+            <div class="titulo-panel" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>3. Radiografía Pre-Contrato: Mes 1 (Arranque con Baja) vs. Mes Ordinario</span>
+                <span style="font-size: 0.75em; color: #64748b; font-weight: normal;">*Previsión de caja antes de iniciar la contrata</span>
+            </div>
+
+            <div class="tarjetas-grid">
+                <!-- Tarjeta 1: Mes 1 (Arranque con Baja) -->
+                <div class="card-desglose mes1">
+                    <span class="card-badge badge-mes1">⚠️ Mes 1 - Arranque de Contrato</span>
+                    <div class="card-title">Inicio con Baja y Sustitución</div>
+                    
+                    <div class="card-metric"><span>Facturación Cliente (Canon):</span><strong id="card1-facturacion" style="color:#2563eb;">0,00 €</strong></div>
+                    <div class="card-metric"><span>↳ Salario Bruto Titular (IT):</span><span id="card1-bruto-titular" style="color:#1e293b; font-weight:600;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ SS Patronal Titular:</span><span id="card1-ss-titular" style="color:#64748b;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ Salario Bruto Sustituto (<span id="card1-dias-baja">30</span>d):</span><span id="card1-bruto-sustituto" style="color:#dc2626; font-weight:600;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ SS Patronal Sustituto:</span><span id="card1-ss-sustituto" style="color:#ef4444;">0,00 €</span></div>
+                    <div class="card-metric"><span>Costes Indirectos Fijos:</span><span id="card1-indirectos" style="color:#64748b;">0,00 €</span></div>
+                    
+                    <div class="card-metric total">
+                        <span>Total Desembolso Bruto Mes 1:</span>
+                        <span id="card1-total-gasto" style="color:#b91c1c;">0,00 €</span>
+                    </div>
+                    <div class="card-metric" style="font-size: 1.05em; font-weight: bold; margin-top: 8px;">
+                        <span>Saldo de Caja Mes 1:</span>
+                        <span id="card1-balance">0,00 €</span>
+                    </div>
+
+                    <div class="alerta-liquidez" id="card1-alerta">
+                        <strong>🛡️ Fondo de Maniobra Necesario:</strong>
+                        Para arrancar este contrato sin tensiones de tesorería, debes disponer de al menos <b id="card1-fondo-maniobra">0,00 €</b> antes de cobrar la 1ª factura del cliente.
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Mes Ordinario Tipo -->
+                <div class="card-desglose ordinario">
+                    <span class="card-badge badge-ordinario">✅ Mes Ordinario Tipo</span>
+                    <div class="card-title">Mes Estándar en Pleno Rendimiento</div>
+                    
+                    <div class="card-metric"><span>Facturación Cliente (Canon):</span><strong id="card2-facturacion" style="color:#2563eb;">0,00 €</strong></div>
+                    <div class="card-metric"><span>↳ Salario Bruto Titular:</span><span id="card2-bruto-titular" style="color:#166534; font-weight:600;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ SS Patronal Titular:</span><span id="card2-ss-titular" style="color:#64748b;">0,00 €</span></div>
+                    <div class="card-metric"><span>Costes Indirectos Fijos:</span><span id="card2-indirectos" style="color:#64748b;">0,00 €</span></div>
+                    
+                    <div class="card-metric total">
+                        <span>Total Desembolso Bruto Ordinario:</span>
+                        <span id="card2-total-gasto" style="color:#1e293b;">0,00 €</span>
+                    </div>
+                    <div class="card-metric" style="font-size: 1.05em; font-weight: bold; margin-top: 8px;">
+                        <span>Beneficio Operativo Mensual:</span>
+                        <span id="card2-balance" style="color:#166534;">0,00 €</span>
+                    </div>
+
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; margin-top: 15px; font-size: 0.85em; color: #166534; line-height: 1.4;">
+                        <strong>Rentabilidad Operativa:</strong>
+                        Margen limpio sobre facturación: <b id="card2-margen-real">0.0%</b> en cada mes ordinario.
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Mes de Vacaciones -->
+                <div class="card-desglose vacaciones">
+                    <span class="card-badge badge-vacaciones">🏖️ Mes Vacaciones (<span id="card3-nombre-mes">Agosto</span>)</span>
+                    <div class="card-title">Cobertura Sustitución Estival</div>
+                    
+                    <div class="card-metric"><span>Facturación Cliente (Canon):</span><strong id="card3-facturacion" style="color:#2563eb;">0,00 €</strong></div>
+                    <div class="card-metric"><span>↳ Salario Bruto Titular (Vacaciones):</span><span id="card3-bruto-titular" style="color:#1e293b; font-weight:600;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ SS Patronal Titular:</span><span id="card3-ss-titular" style="color:#64748b;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ Salario Bruto Sustituto Vac.:</span><span id="card3-bruto-sustituto" style="color:#d97706; font-weight:600;">0,00 €</span></div>
+                    <div class="card-metric"><span>↳ SS Patronal Sustituto Vac.:</span><span id="card3-ss-sustituto" style="color:#f59e0b;">0,00 €</span></div>
+                    <div class="card-metric"><span>Costes Indirectos Fijos:</span><span id="card3-indirectos" style="color:#64748b;">0,00 €</span></div>
+                    
+                    <div class="card-metric total">
+                        <span>Total Desembolso Bruto Vacaciones:</span>
+                        <span id="card3-total-gasto" style="color:#b45309;">0,00 €</span>
+                    </div>
+                    <div class="card-metric" style="font-size: 1.05em; font-weight: bold; margin-top: 8px;">
+                        <span>Saldo Neto del Mes:</span>
+                        <span id="card3-balance">0,00 €</span>
+                    </div>
+
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 12px; margin-top: 15px; font-size: 0.85em; color: #92400e; line-height: 1.4;">
+                        <strong>Garantía Pliego:</strong>
+                        Se mantiene la facturación del canon íntegro cubriendo el puesto con sustituto.
+                    </div>
+                </div>
+            </div>
+
+            <div class="titulo-panel">4. Flujo de Caja y Tesorería Acumulada Mes a Mes</div>
             <div class="canvas-container"><canvas id="graficoFlujo"></canvas></div>
         </div>
 
@@ -296,95 +638,188 @@
 
     <!-- B. MODAL DE VISTA PREVIA (Presupuesto Interactivo) -->
     <div id="modalPresupuesto" class="modal-overlay">
-        <div class="modal-content">
-            <!-- Botones de Acción (Se ocultan al imprimir) -->
-            <div class="modal-actions no-print">
-                <button class="btn-perfil" style="background: #94a3b8; max-width: 150px;" onclick="cerrarVistaPrevia()">❌ Cancelar</button>
-                <button class="btn-perfil" style="background: #10b981; max-width: 250px;" onclick="window.print()">🖨️ Imprimir / Descargar PDF</button>
-            </div>
-
-            <!-- Cabecera Editable -->
-            <div class="pdf-header">
-                <div style="width: 60%;">
-                    <h1 class="pdf-title" contenteditable="true" class="editable" spellcheck="false">Propuesta de Servicios</h1>
-                    <p style="margin: 10px 0 0 0; color: #64748b; font-size: 16px;">
-                        De: <span class="editable" contenteditable="true" placeholder="[Nombre de tu Empresa]" style="font-weight: bold; color: #333;">[Haz clic aquí para escribir tu Empresa]</span><br>
-                        Para: <span class="editable" contenteditable="true" placeholder="[Nombre del Cliente]" style="font-weight: bold; color: #333;">[Haz clic aquí para escribir Empresa Cliente]</span>
-                    </p>
+        <div class="modal-container">
+            <!-- Barra de Herramientas Superior (Oculta al imprimir) -->
+            <div class="modal-toolbar">
+                <div class="toolbar-badge">
+                    <span></span> 
+                    <span>Modo Edición en Directo: Haz clic en cualquier texto para personalizarlo antes de imprimir</span>
                 </div>
-                <div style="text-align: right;">
-                    <div class="pdf-date">Fecha: <span class="editable" contenteditable="true" id="pdf-fecha-actual"></span></div>
-                    <div style="margin-top: 10px; color: #94a3b8; font-size: 12px; font-style: italic;" class="no-print">
-                        (Haz clic en los textos subrayados para editarlos)
-                    </div>
+                <div class="toolbar-iva-group">
+                    <span style="font-weight: 600;">IVA Aplicable:</span>
+                    <button type="button" class="btn-iva active" id="btn-iva-21" onclick="cambiarIVAPDF(21)">21% (General)</button>
+                    <button type="button" class="btn-iva" id="btn-iva-10" onclick="cambiarIVAPDF(10)">10% (Reducido)</button>
+                    <button type="button" class="btn-iva" id="btn-iva-0" onclick="cambiarIVAPDF(0)">0% (Exento)</button>
+                </div>
+                <div class="toolbar-actions">
+                    <button type="button" class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+                    <button type="button" class="btn-close-modal" onclick="cerrarVistaPrevia()">✕ Cerrar</button>
                 </div>
             </div>
 
-            <!-- Descripción Editable -->
-            <div class="pdf-section">
-                <h3 class="editable" contenteditable="true">Descripción del Proyecto</h3>
-                <p class="editable" contenteditable="true" style="color: #475569; line-height: 1.6; width: 100%; min-height: 50px;">
-                    La presente propuesta detalla las condiciones económicas para la prestación de servicios en formato de cobertura continua. 
-                    El servicio asegura la continuidad operativa, gestionando integralmente los perfiles solicitados, incluyendo periodos vacacionales.
-                </p>
-            </div>
-
-            <!-- Tabla de Datos Matemáticos (Se rellena sola pero puedes tocarla) -->
-            <div class="pdf-section">
-                <h3>Detalle Económico</h3>
-                <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th class="editable" contenteditable="true">Concepto</th>
-                            <th style="text-align: right;">Volumen</th>
-                            <th style="text-align: right;">Tarifa / Importe</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <strong class="editable" contenteditable="true">Servicio de Asistencia / Especialista</strong><br>
-                                <span style="font-size:12px; color:#64748b;">(Jornada: <span id="pdf-jornada" class="editable" contenteditable="true">40h Semanales</span>)</span>
-                            </td>
-                            <td style="text-align: right;"><span id="pdf-horas-anuales" class="editable" contenteditable="true">0</span> horas / año</td>
-                            <td class="monto editable" contenteditable="true" id="pdf-tarifa-hora">0,00 €/h</td>
-                        </tr>
-                        <tr id="pdf-fila-sustitucion">
-                            <td>
-                                <strong class="editable" contenteditable="true">Cobertura Ininterrumpida (12 Meses)</strong><br>
-                                <span class="editable" contenteditable="true" style="font-size:12px; color:#64748b;">Sustitución de periodo vacacional incluida</span>
-                            </td>
-                            <td style="text-align: right;">1 Servicio</td>
-                            <td class="monto editable" contenteditable="true">Incluido</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Totales -->
-            <div class="pdf-total-box">
-                <div class="pdf-total-content">
-                    <div class="pdf-total-row">
-                        <span class="editable" contenteditable="true" style="color: #475569;">Cuota Mensual (Base)</span>
-                        <strong class="editable" contenteditable="true" id="pdf-cuota-mensual">0,00 €</strong>
+            <!-- Hoja Formato Documento Corporativo / Proforma -->
+            <div class="factura-papel">
+                <!-- Cabecera Corporativa -->
+                <div class="factura-header">
+                    <div>
+                        <div class="factura-logo-block">
+                            <div class="factura-logo-icon">💼</div>
+                            <div>
+                                <div class="factura-empresa-nombre editable" contenteditable="true" spellcheck="false">[Nombre de tu Empresa / Razón Social]</div>
+                                <div class="factura-datos-emisor">
+                                    <span class="editable" contenteditable="true">NIF/CIF: B-00000000</span> · 
+                                    <span class="editable" contenteditable="true">C/ Principal 123, Polígono Ind., 28001 Madrid</span><br>
+                                    <span class="editable" contenteditable="true">licitaciones@miempresa.com</span> · 
+                                    <span class="editable" contenteditable="true">+34 910 123 456</span> · 
+                                    <span class="editable" contenteditable="true">www.miempresa.com</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="pdf-total-row">
-                        <span class="editable" contenteditable="true" style="color: #475569;">Presupuesto Anual</span>
-                        <strong class="editable" contenteditable="true" id="pdf-presupuesto-anual">0,00 €</strong>
-                    </div>
-                    
-                    <div class="pdf-total-final">
-                        <span class="editable" contenteditable="true">Base Imponible Mensual</span>
-                        <span class="editable" contenteditable="true" id="pdf-total-final">0,00 €/mes</span>
+                    <div class="factura-meta-box">
+                        <div class="factura-tipo-doc editable" contenteditable="true">OFERTA ECONÓMICA / PROFORMA</div>
+                        <div class="factura-meta-row"><span>Nº Ref / Expediente:</span> <strong class="editable" contenteditable="true" id="pdf-ref-doc">EXP-2026-001</strong></div>
+                        <div class="factura-meta-row"><span>Fecha Emisión:</span> <strong class="editable" contenteditable="true" id="pdf-fecha-actual"></strong></div>
+                        <div class="factura-meta-row"><span>Validez Oferta:</span> <strong class="editable" contenteditable="true">30 días naturales</strong></div>
+                        <div class="factura-meta-row"><span>Modalidad:</span> <strong class="editable" contenteditable="true">Cobertura Continua 100%</strong></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Footer Legal Editable -->
-            <div class="pdf-footer">
-                <p class="editable" contenteditable="true"><strong>Condiciones Comerciales:</strong></p>
-                <p class="editable" contenteditable="true">Impuestos no incluidos en los importes mostrados (Añadir IVA aplicable).<br>
-                Validez de la oferta: 30 días naturales desde la fecha de emisión del documento. Forma de pago a 30 días.</p>
+                <!-- Bloque Partes: Cliente y Características -->
+                <div class="factura-partes-grid">
+                    <div class="factura-card-info">
+                        <div class="factura-card-title">Datos del Cliente / Entidad Contratante</div>
+                        <div class="factura-card-content">
+                            <strong class="editable" contenteditable="true" style="font-size: 14px; color: #0f172a;">[Razón Social del Cliente / Órgano de Contratación]</strong><br>
+                            <span class="editable" contenteditable="true">CIF / NIF: A-00000000</span><br>
+                            <span class="editable" contenteditable="true">Dirección: Avda. de la Innovación 45, Edificio B</span><br>
+                            <span class="editable" contenteditable="true">Atención: Dpto. de Compras / Dirección de Operaciones</span><br>
+                            <span class="editable" contenteditable="true">Email: contratacion@cliente.com</span>
+                        </div>
+                    </div>
+                    <div class="factura-card-info">
+                        <div class="factura-card-title">Especificaciones de la Prestación</div>
+                        <div class="factura-card-content">
+                            <div><strong>Régimen:</strong> <span class="editable" contenteditable="true" id="pdf-info-regimen">Licitación / Subcontrata con sustitución obligatoria</span></div>
+                            <div><strong>Jornada Operativa:</strong> <span class="editable" contenteditable="true" id="pdf-jornada">40h Semanales</span></div>
+                            <div><strong>Bolsa Anual de Horas:</strong> <span class="editable" contenteditable="true" id="pdf-info-horas-anuales">1.800 horas</span></div>
+                            <div><strong>Inicio Estimado:</strong> <span class="editable" contenteditable="true">A partir de formalización del contrato</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Objeto del Contrato / Memoria Técnica -->
+                <div class="factura-bloque">
+                    <div class="factura-bloque-titulo">Objeto y Alcance del Servicio</div>
+                    <div class="factura-desc-texto editable" contenteditable="true" spellcheck="false">
+                        Prestación de servicios profesionales de apoyo operativo y técnico bajo especificaciones de pliego o contrato mercantil. La oferta garantiza el 100% de presencia y cobertura ininterrumpida del puesto, asumiendo íntegramente por cuenta de la contratista la gestión y el coste salarial/Seguridad Social de las sustituciones reglamentarias por descanso vacacional y contingencias comunes de incapacidad temporal (IT), garantizando cero interrupciones en la operativa del cliente.
+                    </div>
+                </div>
+
+                <!-- Tabla Económica Desglosada -->
+                <div class="factura-bloque">
+                    <div class="factura-bloque-titulo">Desglose Económico de la Propuesta</div>
+                    <table class="factura-tabla">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">Concepto y Descripción Operativa</th>
+                                <th style="text-align: center; width: 15%;">Unidades / Base</th>
+                                <th style="text-align: right; width: 17%;">Tarifa Unitaria</th>
+                                <th style="text-align: right; width: 18%;">Importe Anual (Base)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong class="editable" contenteditable="true">Servicio Principal Especializado (Titular)</strong><br>
+                                    <span class="editable" contenteditable="true" style="font-size: 12px; color: #64748b;">
+                                        Disponibilidad operativa continua (<span id="pdf-jornada-desc">40h semanales</span>), cobertura técnica y cumplimiento de convenio aplicable.
+                                    </span>
+                                </td>
+                                <td style="text-align: center;"><span id="pdf-horas-anuales" class="editable" contenteditable="true">0</span> h/año</td>
+                                <td class="monto editable" contenteditable="true" id="pdf-tarifa-hora">0,00 €/h</td>
+                                <td class="monto editable" contenteditable="true" id="pdf-fila-importe-anual">0,00 €</td>
+                            </tr>
+                            <tr id="pdf-fila-sustitucion-vac">
+                                <td>
+                                    <strong class="editable" contenteditable="true">Garantía de Cobertura Continua en Vacaciones</strong><br>
+                                    <span class="editable" contenteditable="true" style="font-size: 12px; color: #64748b;">
+                                        Reemplazo con suplente cualificado durante los periodos de descanso anual sin sobrecoste para el cliente.
+                                    </span><br>
+                                    <span class="factura-tag-cobertura">✓ 100% Pliego Garantizado</span>
+                                </td>
+                                <td style="text-align: center;"><span id="pdf-dias-vac" class="editable" contenteditable="true">30</span> días continuos</td>
+                                <td class="monto editable" contenteditable="true">Incluido</td>
+                                <td class="monto editable" contenteditable="true">Incluido</td>
+                            </tr>
+                            <tr id="pdf-fila-sustitucion-bajas">
+                                <td>
+                                    <strong class="editable" contenteditable="true">Garantía de Reemplazo Inmediato en Bajas Médicas (IT)</strong><br>
+                                    <span class="editable" contenteditable="true" style="font-size: 12px; color: #64748b;" id="pdf-desc-regimen-it">
+                                        Previsión y cobertura de contingencias comunes para evitar horas descubiertas o penalizaciones de pliego.
+                                    </span><br>
+                                    <span class="factura-tag-cobertura" id="pdf-tag-regimen-it">✓ Suplencia Asumida (Convenio 100%)</span>
+                                </td>
+                                <td style="text-align: center;"><span id="pdf-dias-bajas" class="editable" contenteditable="true">30</span> días continuos</td>
+                                <td class="monto editable" contenteditable="true">Incluido</td>
+                                <td class="monto editable" contenteditable="true">Incluido</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Condiciones de Pago y Resumen de Totales -->
+                <div class="factura-inferior-grid">
+                    <div class="factura-condiciones-box">
+                        <span class="factura-condiciones-title">Condiciones Comerciales y de Facturación</span>
+                        <ul style="margin: 0; padding-left: 18px; color: #475569; font-size: 12.5px; line-height: 1.6;">
+                            <li><strong class="editable" contenteditable="true">Régimen de Facturación:</strong> <span class="editable" contenteditable="true">Emisión mensual a mes vencido mediante factura electrónica / ordinaria.</span></li>
+                            <li><strong class="editable" contenteditable="true">Forma de Pago:</strong> <span class="editable" contenteditable="true">Transferencia bancaria a 30 días fecha factura.</span></li>
+                            <li><strong class="editable" contenteditable="true">Cuenta Bancaria (IBAN):</strong> <span class="editable" contenteditable="true">ES00 0000 0000 0000 0000 0000</span></li>
+                            <li><strong class="editable" contenteditable="true">Revisión de Precios:</strong> <span class="editable" contenteditable="true">Sujeta a variación en las tablas salariales del Convenio Colectivo de aplicación.</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="factura-totales-card">
+                        <div class="totales-row">
+                            <span>Base Imponible Mensual:</span>
+                            <strong class="editable" contenteditable="true" id="pdf-base-mensual">0,00 €</strong>
+                        </div>
+                        <div class="totales-row">
+                            <span>IVA (<span id="pdf-iva-pct-label">21</span>%):</span>
+                            <span class="editable" contenteditable="true" id="pdf-iva-mensual">0,00 €</span>
+                        </div>
+                        <div class="totales-destacado">
+                            <span>Total Mensual (con IVA):</span>
+                            <strong class="editable" contenteditable="true" id="pdf-total-con-iva-mensual">0,00 €</strong>
+                        </div>
+                        <div class="totales-row anual">
+                            <span>Base Imponible Anual:</span>
+                            <span class="editable" contenteditable="true" id="pdf-base-anual">0,00 €</span>
+                        </div>
+                        <div class="totales-row">
+                            <span>Total Anual Estimado:</span>
+                            <strong class="editable" contenteditable="true" id="pdf-total-anual-con-iva">0,00 €</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Firmas y Conformidad -->
+                <div class="factura-firmas-grid">
+                    <div class="firma-box">
+                        <span class="firma-label editable" contenteditable="true">Por la Empresa Adjudicataria / Prestadora:</span>
+                        <div class="firma-linea editable" contenteditable="true">Firma y Sello autorizado</div>
+                    </div>
+                    <div class="firma-box">
+                        <span class="firma-label editable" contenteditable="true">Aceptación y Conformidad del Cliente:</span>
+                        <div class="firma-linea editable" contenteditable="true">Firma, Sello y Fecha de Conformidad</div>
+                    </div>
+                </div>
+
+                <!-- Pie de Página Legal -->
+                <div class="factura-footer-legal editable" contenteditable="true">
+                    Documento emitido a efectos de cotización técnico-económica y presupuestaria. De conformidad con la normativa de Protección de Datos (RGPD), los datos contenidos en la presente propuesta son confidenciales y se destinarán exclusivamente a la valoración del contrato.
+                </div>
             </div>
         </div>
     </div>
@@ -393,12 +828,40 @@
     <script>
         let chartFlujo = null;
         let estadoEscenarios = { A: null, B: null };
+        let pdfIvaActual = 21;
 
         // --- FUNCIONES DEL MODAL DE PRESUPUESTO ---
+        function cambiarIVAPDF(pct) {
+            pdfIvaActual = pct;
+            document.querySelectorAll('.btn-iva').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('btn-iva-' + pct);
+            if (btn) btn.classList.add('active');
+
+            const tarifaFinal = parseFloat(document.getElementById('tarifaInput').value) || 0;
+            const horasFacturables = parseFloat(document.getElementById('resHoras').innerText.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+            const presupuestoAnual = tarifaFinal * horasFacturables;
+            const cuotaMensual = presupuestoAnual / 12;
+
+            recalcularTotalesPDF(pct, cuotaMensual, presupuestoAnual);
+        }
+
+        function recalcularTotalesPDF(ivaPct, cuotaMensual, presupuestoAnual) {
+            const ivaMensual = cuotaMensual * (ivaPct / 100);
+            const totalConIvaMensual = cuotaMensual + ivaMensual;
+            const totalAnualConIva = presupuestoAnual * (1 + ivaPct / 100);
+
+            document.getElementById('pdf-iva-pct-label').innerText = ivaPct;
+            document.getElementById('pdf-base-mensual').innerText = cuotaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-iva-mensual').innerText = ivaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-total-con-iva-mensual').innerText = totalConIvaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-base-anual').innerText = presupuestoAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-total-anual-con-iva').innerText = totalAnualConIva.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+        }
+
         function abrirVistaPreviaPDF() {
             // 1. Obtener valores de la calculadora
-            const tarifaFinal = parseFloat(document.getElementById('tarifaInput').value);
-            const horasFacturables = parseFloat(document.getElementById('resHoras').innerText.replace(' h', ''));
+            const tarifaFinal = parseFloat(document.getElementById('tarifaInput').value) || 0;
+            const horasFacturables = parseFloat(document.getElementById('resHoras').innerText.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
             const tipoJornada = document.getElementById('tipoJornada').options[document.getElementById('tipoJornada').selectedIndex].text;
             const horasJornada = document.getElementById('horasJornada').value;
             
@@ -408,18 +871,38 @@
             // 2. Volcar datos en el modal
             document.getElementById('pdf-fecha-actual').innerText = new Date().toLocaleDateString('es-ES');
             document.getElementById('pdf-jornada').innerText = horasJornada + "h " + tipoJornada;
-            document.getElementById('pdf-horas-anuales').innerText = horasFacturables.toFixed(0);
+            document.getElementById('pdf-jornada-desc').innerText = horasJornada + "h " + tipoJornada;
+            document.getElementById('pdf-horas-anuales').innerText = horasFacturables.toLocaleString('es-ES', {maximumFractionDigits: 0});
+            document.getElementById('pdf-info-horas-anuales').innerText = horasFacturables.toLocaleString('es-ES', {maximumFractionDigits: 0}) + " horas";
             document.getElementById('pdf-tarifa-hora').innerText = tarifaFinal.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/h";
-            
-            document.getElementById('pdf-cuota-mensual').innerText = cuotaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('pdf-presupuesto-anual').innerText = presupuestoAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('pdf-total-final').innerText = cuotaMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('pdf-fila-importe-anual').innerText = presupuestoAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
 
-            if(!document.getElementById('activarSustitucion').checked) {
-                document.getElementById('pdf-fila-sustitucion').style.display = 'none';
-            } else {
-                document.getElementById('pdf-fila-sustitucion').style.display = 'table-row';
+            recalcularTotalesPDF(pdfIvaActual, cuotaMensual, presupuestoAnual);
+
+            const vacActivo = document.getElementById('activarSustitucionVac').checked;
+            const vacaciones = parseFloat(document.getElementById('vacaciones').value) || 0;
+            document.getElementById('pdf-fila-sustitucion-vac').style.display = (vacActivo && vacaciones > 0) ? 'table-row' : 'none';
+            document.getElementById('pdf-dias-vac').innerText = vacaciones.toFixed(0);
+
+            const bajasActivo = document.getElementById('activarSustitucionBajas').checked;
+            const bajas = parseFloat(document.getElementById('bajas').value) || 0;
+            document.getElementById('pdf-fila-sustitucion-bajas').style.display = (bajasActivo && bajas > 0) ? 'table-row' : 'none';
+            document.getElementById('pdf-dias-bajas').innerText = bajas.toFixed(0);
+
+            const regimenIT = document.getElementById('regimenIT').value;
+            let tagIT = "✓ Suplencia Asumida (Convenio 100%)";
+            let descIT = "Previsión y suplencia íntegra ante contingencias comunes para garantizar el 100% de presencia sin penalizaciones de pliego.";
+            if (regimenIT === 'generalSS') {
+                tagIT = "✓ Suplencia Asumida (Régimen General SS: Días 16+ Mutua)";
+                descIT = "Previsión y suplencia de contingencias comunes con ahorro salarial por prestación delegada de incapacidad temporal (INSS/Mutua).";
+            } else if (regimenIT === 'soloSS') {
+                tagIT = "✓ Suplencia Asumida (Solo Cuota SS Patronal)";
+                descIT = "Previsión y suplencia de contingencias comunes con salario del titular a cargo exclusivo de la entidad aseguradora/INSS.";
             }
+            const elTagIT = document.getElementById('pdf-tag-regimen-it');
+            if (elTagIT) elTagIT.innerText = tagIT;
+            const elDescIT = document.getElementById('pdf-desc-regimen-it');
+            if (elDescIT) elDescIT.innerText = descIT;
 
             // 3. Mostrar el modal
             document.getElementById('modalPresupuesto').style.display = 'block';
@@ -487,9 +970,14 @@
         }
 
         function toggleSustitucion() {
-            const activo = document.getElementById('activarSustitucion').checked;
-            document.getElementById('opcionesSustitucion').style.display = activo ? 'block' : 'none';
-            document.getElementById('rowCosteSustitucion').style.display = activo ? 'flex' : 'none';
+            const activoVac = document.getElementById('activarSustitucionVac').checked;
+            document.getElementById('opcionesSustitucionVac').style.display = activoVac ? 'block' : 'none';
+            document.getElementById('rowCosteSustitucionVac').style.display = activoVac ? 'flex' : 'none';
+
+            const activoBajas = document.getElementById('activarSustitucionBajas').checked;
+            document.getElementById('opcionesSustitucionBajas').style.display = activoBajas ? 'block' : 'none';
+            document.getElementById('rowCosteSustitucionBajas').style.display = activoBajas ? 'flex' : 'none';
+
             calcular('base');
         }
 
@@ -546,12 +1034,20 @@
 
             const tipoJornada = document.getElementById('tipoJornada').value;
             const horasJornada = parseFloat(document.getElementById('horasJornada').value) || 0;
-            const diasTeoricos = Math.max(0, 365 - (parseFloat(document.getElementById('finesSemana').value) || 0) - (parseFloat(document.getElementById('festivos').value) || 0));
+            
+            const finesSemana = parseFloat(document.getElementById('finesSemana').value) || 0;
+            const festivos = parseFloat(document.getElementById('festivos').value) || 0;
+            const diasTeoricos = Math.max(0, 365 - finesSemana - festivos);
 
             let horasDiariasEquivalentes = 0;
-            if (tipoJornada === 'diaria') horasDiariasEquivalentes = horasJornada;
-            else if (tipoJornada === 'semanal') horasDiariasEquivalentes = horasJornada / 5;
-            else if (tipoJornada === 'mensual') horasDiariasEquivalentes = (horasJornada * 12) / (diasTeoricos || 1);
+            if (tipoJornada === 'diaria') {
+                horasDiariasEquivalentes = horasJornada;
+            } else if (tipoJornada === 'semanal') {
+                const diasSemanaLaborables = (finesSemana === 0) ? 7 : 5;
+                horasDiariasEquivalentes = horasJornada / diasSemanaLaborables;
+            } else if (tipoJornada === 'mensual') {
+                horasDiariasEquivalentes = (horasJornada * 12) / (diasTeoricos || 1);
+            }
 
             const totalSSEmpresaPorcentaje = (parseFloat(document.getElementById('empCC').value) || 0) +
                                              (parseFloat(document.getElementById('empAT').value) || 0) +
@@ -563,6 +1059,7 @@
             document.getElementById('resTotalSSEmpresa').innerText = totalSSEmpresaPorcentaje.toFixed(2);
             document.getElementById('labelHorasRes').innerText = `Horas Facturables (~${horasDiariasEquivalentes.toFixed(1)}h/día):`;
 
+            // Días continuos / naturales (incluyen fines de semana)
             const vacaciones = parseFloat(document.getElementById('vacaciones').value) || 0;
             const bajas = parseFloat(document.getElementById('bajas').value) || 0;
 
@@ -572,29 +1069,83 @@
             else if (tipoSalario === 'hora') monetarioAnual = valorSalario * horasDiariasEquivalentes * diasTeoricos;
 
             const baseCotizacionAnual = monetarioAnual;
-            const costeMonetarioEmpresa = Math.max(0, monetarioAnual - (bajas * (monetarioAnual / 365)));
-            const costeSSEmpresa = baseCotizacionAnual * (totalSSEmpresaPorcentaje / 100);
+            const salarioBaseMensual = monetarioAnual / pagas;
+            const salarioDiarioTitular = monetarioAnual / 365;
+            const salarioDiarioMes = (monetarioAnual / 12) / 30;
+
+            // Seguridad Social Patronal Titular: cotización íntegra (100%) los 12 meses
+            const costeSSEmpresaAnual = baseCotizacionAnual * (totalSSEmpresaPorcentaje / 100);
+            const ssMensualTitular = costeSSEmpresaAnual / 12;
+
+            // Opciones de Sustitución
+            const sustitucionVacActiva = document.getElementById('activarSustitucionVac').checked;
+            const sustitucionBajasActiva = document.getElementById('activarSustitucionBajas').checked;
             
-            let costeTotalSustitucion = 0;
-            let diasSustituidosEquivalentes = 0;
-            const sustitucionActiva = document.getElementById('activarSustitucion').checked;
+            const perfilSustitutoVac = document.getElementById('perfilSustitutoVac').value;
+            const perfilSustitutoBajas = document.getElementById('perfilSustitutoBajas').value;
+            const mesVacIndex = parseInt(document.getElementById('mesVacaciones').value) || 7;
 
-            if (sustitucionActiva) {
-                const perfilSustituto = document.getElementById('perfilSustituto').value;
-                const salarioMesSustituto = monetarioAnual / 12;
-                const pctSSSustituto = (perfilSustituto === 'cee') ? 0 : 33.65;
-                const costeSSSustituto = salarioMesSustituto * (pctSSSustituto / 100);
+            const pctSSVac = (perfilSustitutoVac === 'cee') ? 0 : totalSSEmpresaPorcentaje;
+            const pctSSBajas = (perfilSustitutoBajas === 'cee') ? 0 : totalSSEmpresaPorcentaje;
 
-                costeTotalSustitucion = salarioMesSustituto + costeSSSustituto;
-                document.getElementById('resCosteSustitucion').innerText = costeTotalSustitucion.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-                diasSustituidosEquivalentes = diasTeoricos / 12; 
+            // 1. Coste Sustitución Vacaciones (días continuos, 30 días = 1 mes continuo)
+            let costeTotalSustitucionVac = 0;
+            if (sustitucionVacActiva && vacaciones > 0) {
+                const salarioSustitutoVac = salarioDiarioMes * vacaciones;
+                const costeSSSustitutoVac = salarioSustitutoVac * (pctSSVac / 100);
+                costeTotalSustitucionVac = salarioSustitutoVac + costeSSSustitutoVac;
+            }
+            document.getElementById('resCosteSustitucionVac').innerText = costeTotalSustitucionVac.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+
+            // 2. Coste Sustitución Bajas por IT (días continuos de sustituto)
+            let salarioSustitutoBajas = 0;
+            let costeSSSustitutoBajas = 0;
+            let costeTotalSustitutoBajas = 0;
+            if (sustitucionBajasActiva && bajas > 0) {
+                salarioSustitutoBajas = salarioDiarioMes * bajas;
+                costeSSSustitutoBajas = salarioSustitutoBajas * (pctSSBajas / 100);
+                costeTotalSustitutoBajas = salarioSustitutoBajas + costeSSSustitutoBajas;
             }
 
-            const diasFacturables = Math.max(0, diasTeoricos - vacaciones - bajas + diasSustituidosEquivalentes);
-            const horasFacturables = diasFacturables * horasDiariasEquivalentes;
-            
-            const costeAnualTotal = costeMonetarioEmpresa + costeSSEmpresa + indirectosAnual + costeTotalSustitucion;
+            // 3. Salario Titular asumido por la empresa según Política de IT
+            const regimenIT = document.getElementById('regimenIT').value;
+            let reduccionSalarioBajaAnual = 0;
 
+            if (bajas > 0) {
+                if (regimenIT === 'convenio100') {
+                    // Convenio complementa al 100%: no hay deducción salarial
+                    reduccionSalarioBajaAnual = 0;
+                } else if (regimenIT === 'generalSS') {
+                    // Días 1-3: 0% salario empresa (100% no pagado)
+                    // Días 4-15: 60% base a cargo de la empresa (40% de ahorro)
+                    // Días 16+: pago delegado reembolsado por INSS (100% salario ahorrado)
+                    const d1a3 = Math.min(bajas, 3);
+                    const d4a15 = Math.max(0, Math.min(bajas - 3, 12));
+                    const d16mas = Math.max(0, bajas - 15);
+
+                    const noPagado1a3 = d1a3 * salarioDiarioMes;
+                    const noPagado4a15 = d4a15 * (salarioDiarioMes * 0.40);
+                    const noPagado16mas = d16mas * salarioDiarioMes;
+                    reduccionSalarioBajaAnual = noPagado1a3 + noPagado4a15 + noPagado16mas;
+                } else if (regimenIT === 'soloSS') {
+                    // Empresa solo asume cuota patronal SS, 0% salario durante baja
+                    reduccionSalarioBajaAnual = Math.min(monetarioAnual, bajas * salarioDiarioMes);
+                }
+            }
+            const salarioTitularEmpresaAnual = Math.max(0, monetarioAnual - reduccionSalarioBajaAnual);
+
+            // Impacto neto de las bajas por IT en presupuesto anual:
+            const costeNetoBajas = (sustitucionBajasActiva ? costeTotalSustitutoBajas : 0) - reduccionSalarioBajaAnual;
+
+            // 4. Horas y Días Facturables (Garantía de Pliego / Servicio Continuo)
+            // Si está sustituido, las horas NO se descuentan del contrato
+            const diasDescontados = (sustitucionVacActiva ? 0 : (vacaciones * (diasTeoricos / 365))) +
+                                    (sustitucionBajasActiva ? 0 : (bajas * (diasTeoricos / 365)));
+            const diasFacturables = Math.max(0, diasTeoricos - diasDescontados);
+            const horasFacturables = diasFacturables * horasDiariasEquivalentes;
+
+            // 5. Costes Totales Anuales y Tarifas
+            const costeAnualTotal = salarioTitularEmpresaAnual + costeSSEmpresaAnual + indirectosAnual + costeTotalSustitucionVac + (sustitucionBajasActiva ? costeTotalSustitutoBajas : 0);
             const breakeven = horasFacturables > 0 ? costeAnualTotal / horasFacturables : 0;
             let tarifaFinal = 0;
 
@@ -610,75 +1161,242 @@
                 document.getElementById('tarifaSlider').value = tarifaFinal.toFixed(2);
             }
 
-            const beneficioAnual = (tarifaFinal * horasFacturables) - costeAnualTotal;
-            const facturacionMensualPromedio = (tarifaFinal * horasFacturables) / 12;
+            const presupuestoAnual = tarifaFinal * horasFacturables;
+            const beneficioAnual = presupuestoAnual - costeAnualTotal;
+            const cuotaMensualCliente = presupuestoAnual / 12;
             const costeMensualPromedio = costeAnualTotal / 12;
 
+            // Deducciones de la nómina del trabajador titular
             const deduccionesObrera = baseCotizacionAnual * (6.50 / 100);
             const deduccionesIRPF = baseCotizacionAnual * ((parseFloat(document.getElementById('irpf').value) || 0) / 100);
             const liquidoMensual = (baseCotizacionAnual - deduccionesObrera - deduccionesIRPF) / pagas;
 
+            // Actualización de resultados numéricos en Panel 2
             document.getElementById('resBaseCotizacion').innerText = baseCotizacionAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('resCosteSS').innerText = costeSSEmpresa.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resCosteSS').innerText = costeSSEmpresaAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            
+            // Desglose de Bajas IT en Panel 2:
+            document.getElementById('resCosteSustitucionBajas').innerText = (costeNetoBajas >= 0 ? "+" : "-") + Math.abs(costeNetoBajas).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resDiasBajasLabel').innerText = bajas;
+            document.getElementById('resPerfilSustitutoBajasLabel').innerText = (perfilSustitutoBajas === 'cee') ? 'CEE Bonificada 0% SS' : 'Estándar SS';
+            document.getElementById('resSustitutoBajasBruto').innerText = (sustitucionBajasActiva && bajas > 0) ? ("+" + costeTotalSustitutoBajas.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €") : "0,00 €";
+            document.getElementById('resAhorroBajaIT').innerText = (reduccionSalarioBajaAnual > 0) ? ("-" + reduccionSalarioBajaAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €") : "0,00 €";
+            document.getElementById('rowAhorroIT').style.display = (reduccionSalarioBajaAnual > 0) ? 'flex' : 'none';
+            document.getElementById('rowCosteSustitucionBajas').style.display = (bajas > 0 || sustitucionBajasActiva) ? 'block' : 'none';
+
             document.getElementById('resCosteTotal').innerText = costeAnualTotal.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             document.getElementById('resCosteMensual').innerText = costeMensualPromedio.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
             document.getElementById('resHoras').innerText = horasFacturables.toFixed(0) + " h";
             document.getElementById('resBreakeven').innerText = breakeven.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/h";
-            document.getElementById('resFacturacionMensual').innerText = facturacionMensualPromedio.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
+            document.getElementById('resFacturacionMensual').innerText = cuotaMensualCliente.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
             document.getElementById('resBeneficio').innerText = beneficioAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('resNeto').innerText = liquidoMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-
-            // --- Lógica del Flujo de Caja ---
-            const salarioBaseMensual = costeMonetarioEmpresa / pagas; 
-            const ssMensual = costeSSEmpresa / 12;
-            const costeFijoMesOrdinario = salarioBaseMensual + ssMensual + indirectosMensual;
             
-            let gastosMes = Array(12).fill(costeFijoMesOrdinario);
+            // Impacto en canon de cliente por régimen de IT:
+            const elImpacto = document.getElementById('resImpactoITCliente');
+            if (elImpacto) {
+                if (regimenIT === 'convenio100') {
+                    elImpacto.innerHTML = '<span style="color:#64748b;">Convenio 100% (Sin deducción)</span>';
+                } else {
+                    const ahorroMensualCanon = (reduccionSalarioBajaAnual * (1 + margen / 100)) / 12;
+                    elImpacto.innerHTML = `<span style="color:#166534;">Ahorro de -${ahorroMensualCanon.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €/mes por IT</span>`;
+                }
+            }
 
-            if(pagas === 14) {
+            // Retribuciones brutas destacadas (Licitación)
+            document.getElementById('resBrutoMensual').innerText = salarioBaseMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
+            document.getElementById('rowPagaExtra').style.display = (pagas === 14) ? 'flex' : 'none';
+            document.getElementById('resPagaExtra').innerText = (pagas === 14) ? (salarioBaseMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " € c/u") : "0,00 €";
+            document.getElementById('resBrutoAnual').innerText = monetarioAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/año";
+            
+            const elBrutoEf = document.getElementById('resBrutoEfectivoEmpresa');
+            if (elBrutoEf) {
+                elBrutoEf.innerText = salarioTitularEmpresaAnual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/año";
+                document.getElementById('rowBrutoEfectivoEmpresa').style.display = (reduccionSalarioBajaAnual > 0) ? 'flex' : 'none';
+            }
+
+            document.getElementById('resBrutoDiario').innerText = salarioDiarioTitular.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/día";
+            document.getElementById('resSSMensualTitular').innerText = ssMensualTitular.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €/mes";
+
+            if (document.getElementById('resNeto')) {
+                document.getElementById('resNeto').innerText = liquidoMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            }
+
+            // =========================================================================
+            // 6. CÓMPUTO TEMPORAL MES A MES: BAJAS EN LOS PRIMEROS 30 DÍAS (MES 1)
+            // =========================================================================
+            // Los primeros 30 días de baja se imputan estrictamente en el Mes 1 (Arranque de contrato)
+            const diasBajaMes1 = Math.min(30, bajas);
+            
+            // Coste salarial titular en Mes 1:
+            let salarioTitularMes1 = (monetarioAnual / 12);
+            if (diasBajaMes1 > 0) {
+                if (regimenIT === 'convenio100') {
+                    salarioTitularMes1 = (monetarioAnual / 12);
+                } else if (regimenIT === 'generalSS') {
+                    const d1a3 = Math.min(diasBajaMes1, 3);
+                    const d4a15 = Math.max(0, Math.min(diasBajaMes1 - 3, 12));
+                    const d16mas = Math.max(0, diasBajaMes1 - 15);
+                    const ahorroMes1 = (d1a3 * salarioDiarioMes) + (d4a15 * salarioDiarioMes * 0.40) + (d16mas * salarioDiarioMes);
+                    salarioTitularMes1 = Math.max(0, (monetarioAnual / 12) - ahorroMes1);
+                } else if (regimenIT === 'soloSS') {
+                    salarioTitularMes1 = Math.max(0, (monetarioAnual / 12) - (diasBajaMes1 * salarioDiarioMes));
+                }
+            }
+            const costeTitularMes1 = salarioTitularMes1 + ssMensualTitular;
+
+            // Coste sustituto en Mes 1:
+            let sueldoSustitutoMes1 = 0;
+            let ssSustitutoMes1 = 0;
+            if (sustitucionBajasActiva && diasBajaMes1 > 0) {
+                sueldoSustitutoMes1 = salarioDiarioMes * diasBajaMes1;
+                ssSustitutoMes1 = sueldoSustitutoMes1 * (pctSSBajas / 100);
+            }
+            const costeSustitutoMes1 = sueldoSustitutoMes1 + ssSustitutoMes1;
+
+            const totalGastoMes1 = costeTitularMes1 + costeSustitutoMes1 + indirectosMensual;
+            const balanceMes1 = cuotaMensualCliente - totalGastoMes1;
+
+            // Mes Ordinario Tipo (sin incidencias):
+            const salarioTitularOrdinario = salarioBaseMensual;
+            const costeTitularOrdinario = salarioTitularOrdinario + ssMensualTitular;
+            const totalGastoOrdinario = costeTitularOrdinario + indirectosMensual;
+            const balanceOrdinario = cuotaMensualCliente - totalGastoOrdinario;
+            const margenOrdinario = cuotaMensualCliente > 0 ? ((balanceOrdinario / cuotaMensualCliente) * 100) : 0;
+
+            // Mes Vacaciones:
+            const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const nombreMesVac = mesesNombres[mesVacIndex];
+            const sueldoSustitutoVac = (sustitucionVacActiva && vacaciones > 0) ? (salarioDiarioMes * vacaciones) : 0;
+            const ssSustitutoVac = (sustitucionVacActiva && vacaciones > 0) ? (sueldoSustitutoVac * (pctSSVac / 100)) : 0;
+            const totalGastoVac = totalGastoOrdinario + (sustitucionVacActiva ? costeTotalSustitucionVac : 0);
+            const balanceVac = cuotaMensualCliente - totalGastoVac;
+
+            // Volcar datos a las Tarjetas de Radiografía Pre-Contrato
+            // Tarjeta 1 (Mes 1)
+            document.getElementById('card1-facturacion').innerText = cuotaMensualCliente.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-bruto-titular').innerText = salarioTitularMes1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-ss-titular').innerText = ssMensualTitular.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-dias-baja').innerText = diasBajaMes1;
+            document.getElementById('card1-bruto-sustituto').innerText = sueldoSustitutoMes1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-ss-sustituto').innerText = ssSustitutoMes1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-indirectos').innerText = indirectosMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card1-total-gasto').innerText = totalGastoMes1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            
+            const elBal1 = document.getElementById('card1-balance');
+            elBal1.innerText = (balanceMes1 >= 0 ? "+" : "") + balanceMes1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            elBal1.style.color = balanceMes1 >= 0 ? "#166534" : "#991b1b";
+
+            document.getElementById('card1-fondo-maniobra').innerText = totalGastoMes1.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+
+            // Tarjeta 2 (Mes Ordinario)
+            document.getElementById('card2-facturacion').innerText = cuotaMensualCliente.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card2-bruto-titular').innerText = salarioTitularOrdinario.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card2-ss-titular').innerText = ssMensualTitular.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card2-indirectos').innerText = indirectosMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card2-total-gasto').innerText = totalGastoOrdinario.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card2-balance').innerText = "+" + balanceOrdinario.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card2-margen-real').innerText = margenOrdinario.toFixed(1) + "%";
+
+            // Tarjeta 3 (Mes Vacaciones)
+            document.getElementById('card3-nombre-mes').innerText = nombreMesVac;
+            document.getElementById('card3-facturacion').innerText = cuotaMensualCliente.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card3-bruto-titular').innerText = salarioTitularOrdinario.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card3-ss-titular').innerText = ssMensualTitular.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card3-bruto-sustituto').innerText = sueldoSustitutoVac.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card3-ss-sustituto').innerText = ssSustitutoVac.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card3-indirectos').innerText = indirectosMensual.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('card3-total-gasto').innerText = totalGastoVac.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            
+            const elBal3 = document.getElementById('card3-balance');
+            elBal3.innerText = (balanceVac >= 0 ? "+" : "") + balanceVac.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            elBal3.style.color = balanceVac >= 0 ? "#166534" : "#991b1b";
+
+            // =========================================================================
+            // 7. GRÁFICO: 12 MESES CON TESORERÍA ACUMULADA
+            // =========================================================================
+            let gastosMes = Array(12).fill(totalGastoOrdinario);
+            
+            // Mes 1: tiene el gasto real con la baja concentrada en los primeros 30 días
+            gastosMes[0] = totalGastoMes1;
+
+            // Si hay más de 30 días de baja, los días restantes se computan en Mes 2:
+            if (bajas > 30) {
+                const diasBajaRestantes = bajas - 30;
+                let reduccionSalarioMes2 = 0;
+                if (regimenIT === 'soloSS' || regimenIT === 'generalSS') {
+                    reduccionSalarioMes2 = Math.min(monetarioAnual / 12, diasBajaRestantes * salarioDiarioMes);
+                }
+                const extraSustitutoMes2 = sustitucionBajasActiva ? ((salarioDiarioMes * diasBajaRestantes) * (1 + pctSSBajas / 100)) : 0;
+                gastosMes[1] = gastosMes[1] - reduccionSalarioMes2 + extraSustitutoMes2;
+            }
+
+            // Mes de Vacaciones:
+            if (sustitucionVacActiva) {
+                gastosMes[mesVacIndex] += costeTotalSustitucionVac;
+            }
+
+            // Pagas extras si son 14 pagas:
+            if (pagas === 14) {
                 gastosMes[5] += salarioBaseMensual; // Junio
                 gastosMes[11] += salarioBaseMensual; // Diciembre
             }
 
-            let datosMensuales = [];
+            let balancesMensuales = [];
+            let tesoreriaAcumulada = [];
+            let acumulado = 0;
 
-            if (sustitucionActiva) {
-                for(let i = 0; i < 12; i++) {
-                    let balanceMes = facturacionMensualPromedio - gastosMes[i];
-                    if(i === 7) balanceMes -= costeTotalSustitucion;
-                    datosMensuales.push(balanceMes);
-                }
-            } else {
-                const facturacionMesActivo = horasFacturables > 0 ? (tarifaFinal * horasFacturables) / 11 : 0;
-                for(let i = 0; i < 12; i++) {
-                    if (i === 7) {
-                        datosMensuales.push(-gastosMes[i]); 
-                    } else {
-                        datosMensuales.push(facturacionMesActivo - gastosMes[i]);
-                    }
-                }
+            for (let i = 0; i < 12; i++) {
+                const bal = cuotaMensualCliente - gastosMes[i];
+                balancesMensuales.push(bal);
+                acumulado += bal;
+                tesoreriaAcumulada.push(acumulado);
             }
+
+            const etiquetasMeses = ['Ene (Baja)', 'Feb', 'Mar', 'Abr', 'May', 'Jun (Extra)', 'Jul', nombreMesVac.substring(0, 3) + ' (Vac)', 'Sep', 'Oct', 'Nov', 'Dic (Extra)'];
 
             if (chartFlujo) chartFlujo.destroy();
             chartFlujo = new Chart(document.getElementById('graficoFlujo').getContext('2d'), {
-                type: 'bar',
                 data: {
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago (Sust)', 'Sep', 'Oct', 'Nov', 'Dic'],
-                    datasets: [{
-                        label: 'Balance Neto Mensual (€)',
-                        data: datosMensuales,
-                        backgroundColor: (c) => c.raw >= 0 ? '#34d399' : '#f87171',
-                        borderRadius: 4
-                    }]
+                    labels: etiquetasMeses,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Balance Neto Mensual (€)',
+                            data: balancesMensuales,
+                            backgroundColor: (c) => c.raw >= 0 ? '#34d399' : '#f87171',
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            type: 'line',
+                            label: 'Tesorería Acumulada (€)',
+                            data: tesoreriaAcumulada,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#1d4ed8',
+                            yAxisID: 'y'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: true, position: 'top' },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `Balance: ${context.parsed.y.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`
+                                label: (context) => `${context.dataset.label}: ${context.parsed.y.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: (v) => v.toLocaleString('es-ES') + ' €'
                             }
                         }
                     }
