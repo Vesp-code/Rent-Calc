@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Calculadora de Rentabilidad Avanzada</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -1371,10 +1374,11 @@
             <!-- Barra de Asignación Interactiva y Tira Mensual de Botones -->
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <span style="font-size: 1.1em;">🗓️</span>
                         <strong style="color: #1e293b; font-size: 0.95em;">Planificador Mensual de Incidencias:</strong>
                         <span style="font-size: 0.8em; color: #64748b;">(Cambia el mes de las incidencias para analizar el impacto en caja)</span>
+                        <span id="planificador-resumen-it" style="display: none; font-size: 0.8em; color: #991b1b; background: #fee2e2; border: 1px solid #fca5a5; padding: 2px 10px; border-radius: 12px; font-weight: 600;"></span>
                     </div>
                     <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; align-items: center; gap: 6px;">
@@ -2113,6 +2117,26 @@
             const nombreMesVac = mesesNombres[mesVacIndex];
             const nombreMesBaja = mesesNombres[mesBajaIndex];
 
+            // Distribuir los días de baja entre los meses consecutivos a partir de mesBajaIndex (cascada completa para 1, 2, 3 o más meses):
+            const diasBajaPorMes = Array(12).fill(0);
+            if (bajas > 0) {
+                let diasRestantes = bajas;
+                for (let step = 0; step < 12 && diasRestantes > 0; step++) {
+                    const m = (mesBajaIndex + step) % 12;
+                    const d = Math.min(30, diasRestantes);
+                    diasBajaPorMes[m] = d;
+                    diasRestantes -= d;
+                }
+            }
+
+            const mesesDetalleIT = [];
+            for (let step = 0; step < 12; step++) {
+                const m = (mesBajaIndex + step) % 12;
+                if (diasBajaPorMes[m] > 0) {
+                    mesesDetalleIT.push(`${mesesNombres[m]} (${diasBajaPorMes[m]}d)`);
+                }
+            }
+
             // 6.1 Mes Ordinario Tipo (sin incidencias):
             const salarioTitularOrdinario = salarioBaseMensual;
             const costeTitularOrdinario = salarioTitularOrdinario + ssMensualTitular;
@@ -2184,10 +2208,20 @@
             if (elAvisoPluri) {
                 if (bajas > 30) {
                     elAvisoPluri.style.display = 'block';
-                    const mesesAfectados = Math.ceil(bajas / 30);
-                    elAvisoPluri.innerHTML = `<strong>ℹ️ Previsión plurimensual de ${bajas} días:</strong> Esta tarjeta muestra la foto de <strong>1 mes tipo</strong> (${diasBajaCard1}d). En el planificador inferior los ${bajas} días se reflejan en ${mesesAfectados} meses consecutivos a partir de <strong>${nombreMesBaja}</strong>.`;
+                    elAvisoPluri.innerHTML = `<strong>ℹ️ Previsión plurimensual de ${bajas} días:</strong> Esta tarjeta muestra la foto de <strong>1 mes tipo</strong> (${diasBajaCard1}d). En el planificador inferior los ${bajas} días se distribuyen en <strong>${mesesDetalleIT.length} meses consecutivos</strong>: ${mesesDetalleIT.join(', ')}.`;
                 } else {
                     elAvisoPluri.style.display = 'none';
+                }
+            }
+
+            // Resumen de distribución en la cabecera del Planificador Inferior (Sección 4):
+            const elResumenIT = document.getElementById('planificador-resumen-it');
+            if (elResumenIT) {
+                if (bajas > 0 && sustitucionBajasActiva) {
+                    elResumenIT.style.display = 'inline-block';
+                    elResumenIT.innerHTML = `⚠️ Cobertura IT: <b>${bajas} días</b> en <b>${mesesDetalleIT.length} meses</b> (${mesesDetalleIT.join(', ')})`;
+                } else {
+                    elResumenIT.style.display = 'none';
                 }
             }
 
@@ -2233,18 +2267,6 @@
             // =========================================================================
             // 7. GRÁFICO Y PLANIFICADOR: 12 MESES CON TESORERÍA ACUMULADA
             // =========================================================================
-            // 1. Distribuir los días de baja entre los meses consecutivos a partir de mesBajaIndex:
-            const diasBajaPorMes = Array(12).fill(0);
-            if (bajas > 0) {
-                let diasRestantes = bajas;
-                for (let step = 0; step < 12 && diasRestantes > 0; step++) {
-                    const m = (mesBajaIndex + step) % 12;
-                    const d = Math.min(30, diasRestantes);
-                    diasBajaPorMes[m] = d;
-                    diasRestantes -= d;
-                }
-            }
-
             // 2. Calcular los gastos de cada mes (0 a 11):
             let gastosMes = Array(12).fill(0);
             for (let i = 0; i < 12; i++) {
